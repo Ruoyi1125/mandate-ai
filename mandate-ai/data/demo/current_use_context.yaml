@@ -1,0 +1,14 @@
+intended_operation: summarize
+intended_purpose: course_research
+intended_audience: course_teacher
+is_public: false
+includes_identity: false
+includes_sensitive_data: false
+uses_ai: true
+includes_inference: false
+allows_human_review: true
+retention_period: until course project completion
+downstream_reuse_planned: false
+data_types:
+  - anonymous_quotes
+  - summary

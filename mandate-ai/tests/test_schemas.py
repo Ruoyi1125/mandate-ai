@@ -67,19 +67,19 @@ def test_opinion_cluster_rejects_duplicate_source_ids() -> None:
         )
 
 
-def test_audit_request_rejects_duplicate_sources() -> None:
+def test_audit_request_allows_duplicate_sources_for_pipeline_warning() -> None:
     source = SourceRecord(source_id="s1", text="Opinion", metadata={})
-    with pytest.raises(ValidationError):
-        AuditRequest(
-            project_name="Project",
-            representation_mode=RepresentationMode.REAL_GROUP,
-            source_records=[source, source],
-            ai_generated_summary="Summary",
-            authorization_profile=_profile(),
-            intended_purpose="research",
-            intended_audience="internal",
-            is_public=False,
-        )
+    request = AuditRequest(
+        project_name="Project",
+        representation_mode=RepresentationMode.REAL_GROUP,
+        source_records=[source, source],
+        ai_generated_summary="Summary",
+        authorization_profile=_profile(),
+        intended_purpose="research",
+        intended_audience="internal",
+        is_public=False,
+    )
+    assert len(request.source_records) == 2
 
 
 def test_audit_passport_count_consistency() -> None:

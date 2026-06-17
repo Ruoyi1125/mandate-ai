@@ -4,3 +4,122 @@ default_required_actions:
 public_use:
   requires_disclosure: true
   disclosure_text: Disclose that the summary was AI-generated and audited by MANDATE.
+
+quantifier_thresholds:
+  supermajority: 0.75
+  partial_min_count: 2
+
+omission_thresholds:
+  numerical_minority_ratio: 0.2
+  weak_similarity: 0.18
+  covered_similarity: 0.32
+  near_one_cluster_per_opinion_ratio: 0.75
+  minimum_cluster_size: 1
+  merge_similarity_threshold: 0.72
+  maximum_recommended_clusters: 10
+
+normative_salience_terms:
+  - 权利
+  - 歧视
+  - 隐私
+  - 无法申诉
+  - 不能申诉
+  - 不可逆
+  - 弱势群体
+  - 少数群体
+  - 被排除
+  - 未成年人
+  - 严重误判
+  - 强烈反对
+  - 坚决反对
+  - 申诉
+  - 退出
+  - 复核
+  - 纠错
+  - 删除
+
+authorization_rules:
+  - rule_id: AUTHORIZATION_MISSING
+    description: Required authorization fields are missing.
+    condition: missing_authority_basis
+    status: UNKNOWN
+    required_action: Provide explicit authorization information.
+    required_disclosure: Authorization basis has not been verified.
+    severity: high
+  - rule_id: PURPOSE_OUT_OF_SCOPE
+    description: Intended purpose is outside permitted purposes.
+    condition: purpose_out_of_scope
+    status: REAUTHORIZE
+    required_action: Obtain authorization for the intended purpose.
+    required_disclosure: Current use exceeds the stated purpose.
+    severity: high
+  - rule_id: AUDIENCE_OUT_OF_SCOPE
+    description: Intended audience is outside permitted audiences.
+    condition: audience_out_of_scope
+    status: REAUTHORIZE
+    required_action: Obtain authorization for the intended audience.
+    required_disclosure: Current use exceeds the stated audience.
+    severity: high
+  - rule_id: PUBLICATION_NOT_ALLOWED
+    description: Public release is not allowed.
+    condition: publication_not_allowed
+    status: PROHIBITED
+    required_action: Do not publish without new authorization.
+    required_disclosure: Public publication was not authorized.
+    severity: critical
+  - rule_id: AI_PROCESSING_NOT_ALLOWED
+    description: AI processing is not allowed.
+    condition: ai_processing_not_allowed
+    status: PROHIBITED
+    required_action: Stop AI processing or obtain explicit consent.
+    required_disclosure: AI processing was not authorized.
+    severity: critical
+  - rule_id: INFERENCE_NOT_ALLOWED
+    description: Inference beyond summarization is not allowed.
+    condition: inference_not_allowed
+    status: REAUTHORIZE
+    required_action: Remove inferred attitudes or obtain renewed authorization.
+    required_disclosure: Inferences beyond source text were not authorized.
+    severity: high
+  - rule_id: IDENTITY_DISCLOSURE_NOT_ALLOWED
+    description: Identity disclosure is not allowed.
+    condition: identity_disclosure_not_allowed
+    status: PROHIBITED
+    required_action: Remove identities or obtain explicit disclosure consent.
+    required_disclosure: Identity disclosure was not authorized.
+    severity: critical
+  - rule_id: REUSE_NOT_ALLOWED
+    description: Downstream reuse is not allowed.
+    condition: reuse_not_allowed
+    status: REAUTHORIZE
+    required_action: Do not reuse materials beyond this audit without authorization.
+    required_disclosure: Downstream reuse was not authorized.
+    severity: high
+  - rule_id: MODEL_TRAINING_NOT_ALLOWED
+    description: Model training is not allowed.
+    condition: model_training_not_allowed
+    status: PROHIBITED
+    required_action: Do not use these materials for model training.
+    required_disclosure: Model training was not authorized.
+    severity: critical
+  - rule_id: REQUIRED_DISCLOSURE_MISSING
+    description: Required disclosures must accompany use.
+    condition: required_disclosure_missing
+    status: CONDITIONAL
+    required_action: Add required disclosures before use.
+    required_disclosure: AI-assisted summary; exploratory sample; not representative of all students.
+    severity: medium
+  - rule_id: WITHDRAWAL_MECHANISM_MISSING
+    description: Withdrawal support is missing or unclear.
+    condition: withdrawal_mechanism_missing
+    status: CONDITIONAL
+    required_action: Provide a withdrawal method or disclose its absence.
+    required_disclosure: Withdrawal process must be disclosed.
+    severity: medium
+  - rule_id: UNIVERSAL_REPRESENTATION_NOT_AUTHORIZED
+    description: Authorization does not permit speaking for the whole group.
+    condition: universal_representation_not_authorized
+    status: REAUTHORIZE
+    required_action: Remove universal representation or obtain authorization from the represented group.
+    required_disclosure: Uploaded sample does not authorize claims about all students.
+    severity: high

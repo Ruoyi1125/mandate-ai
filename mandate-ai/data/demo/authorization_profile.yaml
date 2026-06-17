@@ -1,0 +1,30 @@
+authorization_id: demo-course-research-consent
+represented_subject: anonymous students in uploaded source records
+authorizing_party: participating students
+authority_basis: RESEARCH_CONSENT
+source_type: anonymous course project opinions
+permitted_operations:
+  - summarize
+  - audit
+permitted_purposes:
+  - course_research
+permitted_audiences:
+  - course_teacher
+prohibited_purposes:
+  - commercial
+prohibited_audiences:
+  - public
+allow_publication: false
+allow_ai_processing: true
+allow_rewriting: true
+allow_inference: false
+allow_identity_disclosure: false
+allow_reuse: false
+allow_model_training: false
+duration_description: Participants may withdraw future use before project completion.
+withdrawal_supported: true
+withdrawal_method: contact the course project team
+required_disclosures:
+  - AI-assisted summary
+  - Exploratory sample; not representative of all students
+notes: Does not authorize claims as the formal opinion of all students.
