@@ -1,0 +1,8 @@
+streamlit>=1.36,<2
+pydantic>=2.7,<3
+pandas>=2.2,<3
+scikit-learn>=1.5,<2
+sentence-transformers>=3.0,<4
+plotly>=5.22,<6
+PyYAML>=6.0,<7
+pytest>=8.2,<9

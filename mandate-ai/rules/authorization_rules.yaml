@@ -1,0 +1,6 @@
+default_required_actions:
+  - Keep original source records available for review.
+
+public_use:
+  requires_disclosure: true
+  disclosure_text: Disclose that the summary was AI-generated and audited by MANDATE.
