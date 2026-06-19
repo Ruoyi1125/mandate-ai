@@ -69,6 +69,18 @@ iframe { border:none !important; display:block; }
 # STEP PAGES
 # ═══════════════════════════════════════════════════════════════════════════
 
+def _scroll_top() -> None:
+    """Inject JS to scroll the Streamlit main pane back to the top."""
+    import streamlit.components.v1 as _cv1
+    _cv1.html(
+        "<script>"
+        "var el=window.parent.document.querySelector('section.main');"
+        "if(el)el.scrollTop=0;"
+        "</script>",
+        height=0,
+    )
+
+
 def _nav(back_step: int | None, forward_label: str = "下一步 →",
          forward_disabled: bool = False, forward_primary: bool = False) -> bool:
     """Bottom navigation bar. Returns True when forward is clicked."""
@@ -77,6 +89,7 @@ def _nav(back_step: int | None, forward_label: str = "下一步 →",
     with cols[0]:
         if back_step is not None:
             if st.button("← 返回", key=f"back_{back_step}"):
+                _scroll_top()
                 st.session_state["step"] = back_step
                 st.rerun()
         else:
@@ -95,6 +108,8 @@ def _nav(back_step: int | None, forward_label: str = "下一步 →",
             type="primary" if forward_primary else "secondary",
             disabled=forward_disabled,
         )
+    if clicked:
+        _scroll_top()
     return clicked
 
 
@@ -1305,7 +1320,7 @@ def page_revision() -> None:
             f'为探索性样本，不代表全体参与者立场。</div>'
         )
 
-        # Reconstruct content sentences from structured data (same logic as revision_generator.py)
+        # Rebuild revision as readable final prose (not editorial instructions)
         _rev_paras: list[str] = []
         if passport.omission_result:
             for _asmt in passport.omission_result.coverage_assessments:
@@ -1317,22 +1332,32 @@ def page_revision() -> None:
                     continue
                 _q = _cl.representative_quotes[0] if _cl.representative_quotes else ""
                 _n = _cl.unique_participant_count
+                _q_html = (
+                    f'<span style="font-style:italic;color:rgba(232,228,220,.65);">「{_q}」</span>'
+                    if _q else ""
+                )
                 if _asmt.status == CoverageStatus.COVERED:
                     _rev_paras.append(
-                        f'当前材料中有{_n}名参与者表达了与"{_cl.label}"相关的意见。'
+                        f'关于「{_cl.label}」：共 {_n} 名参与者有相关表达，'
+                        f'意见已在总结中如实呈现。'
+                        + (f' 原声示例：{_q_html}' if _q_html else '')
                     )
                 elif _asmt.status in {CoverageStatus.WEAKENED, CoverageStatus.DISTORTED}:
-                    _sent = f'关于"{_cl.label}"，应保留限定条件和原始强度'
-                    _sent += f'，例如：{_q}' if _q else '。'
-                    _rev_paras.append(_sent)
+                    _rev_paras.append(
+                        f'关于「{_cl.label}」：参与者意见存在明显分歧与限定条件，'
+                        f'修订版如实保留了这种复杂性，未作简化。'
+                        + (f' 原声示例：{_q_html}' if _q_html else '')
+                    )
                 elif (_asmt.status == CoverageStatus.OMITTED
                       and (_cl.is_normatively_salient or _cl.is_procedural)):
-                    _sent = f'原始材料还包含"{_cl.label}"这一重要声音'
-                    _sent += f'，例如：{_q}' if _q else '。'
-                    _rev_paras.append(_sent)
+                    _rev_paras.append(
+                        f'关于「{_cl.label}」：这是 {_n} 名参与者明确提及的重要议题，'
+                        f'原总结未予覆盖，修订版已补入。'
+                        + (f' 原声示例：{_q_html}' if _q_html else '')
+                    )
 
         _body_html = "".join(
-            f'<p style="margin-bottom:.85rem;line-height:1.85;">{p}</p>'
+            f'<p style="margin-bottom:1rem;line-height:1.9;">{p}</p>'
             for p in _rev_paras
         ) if _rev_paras else '<p style="color:rgba(232,228,220,.4);">未生成修订内容。</p>'
 
