@@ -99,20 +99,20 @@ def badge(text: str, cls: str = "b-muted") -> str:
 def step_header(num: str, zh: str, title: str, subtitle: str = "") -> None:
     """Render a full-width cinematic step heading."""
     sub_html = (
-        f'<div style="font-family:Inter,sans-serif;font-size:.92rem;'
-        f'font-weight:300;color:rgba(232,228,220,.58);margin-top:1rem;'
-        f'letter-spacing:.02em;line-height:1.9;max-width:600px;'
+        f'<div style="font-family:Inter,sans-serif;font-size:.84rem;'
+        f'font-weight:300;color:rgba(232,228,220,.52);margin-top:.6rem;'
+        f'letter-spacing:.02em;line-height:1.7;max-width:560px;'
         f'margin-left:auto;margin-right:auto;">{subtitle}</div>'
         if subtitle else ""
     )
     st.markdown(
-        f'<div style="text-align:center;padding:3rem 1rem 2.5rem;">'
-        f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:.6rem;'
-        f'letter-spacing:.32em;color:rgba(232,228,220,.45);'
-        f'text-transform:uppercase;margin-bottom:1.2rem;">{num} / {zh}</div>'
+        f'<div style="text-align:center;padding:1.4rem 1rem 1.2rem;">'
+        f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:.58rem;'
+        f'letter-spacing:.28em;color:rgba(232,228,220,.38);'
+        f'text-transform:uppercase;margin-bottom:.7rem;">{num} / {zh}</div>'
         f'<div style="font-family:\'Cormorant Garamond\',serif;'
-        f'font-size:clamp(2.2rem,5vw,3.4rem);font-weight:300;'
-        f'color:rgba(232,228,220,.97);line-height:1.3;'
+        f'font-size:clamp(1.8rem,4vw,2.6rem);font-weight:300;'
+        f'color:rgba(232,228,220,.97);line-height:1.25;'
         f'text-shadow:0 0 80px rgba(140,180,240,.4);">{title}</div>'
         f'{sub_html}</div>',
         unsafe_allow_html=True,

@@ -84,7 +84,7 @@ def _scroll_top() -> None:
 def _nav(back_step: int | None, forward_label: str = "下一步 →",
          forward_disabled: bool = False, forward_primary: bool = False) -> bool:
     """Bottom navigation bar. Returns True when forward is clicked."""
-    st.markdown("<div style='height:3rem;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:1.2rem;'></div>", unsafe_allow_html=True)
     cols = st.columns([1, 3, 1])
     with cols[0]:
         if back_step is not None:
@@ -311,17 +311,16 @@ def page_summary() -> None:
 
     # Single focal point: one big question, one input, whisper hints
     st.markdown(
-        '<div style="text-align:center;padding:4rem 2rem 2.2rem;">'
+        '<div style="text-align:center;padding:1.4rem 2rem 1rem;">'
         '<div style="font-family:\'JetBrains Mono\',monospace;font-size:.55rem;'
-        'letter-spacing:.28em;color:rgba(232,228,220,.32);margin-bottom:1.4rem;">02 / AI 说了什么</div>'
+        'letter-spacing:.28em;color:rgba(232,228,220,.32);margin-bottom:.6rem;">02 / AI 说了什么</div>'
         '<div style="font-family:\'Cormorant Garamond\',serif;'
-        'font-size:clamp(2rem,4.5vw,3rem);font-weight:300;'
-        'color:rgba(232,228,220,.94);line-height:1.55;'
+        'font-size:clamp(1.8rem,4vw,2.6rem);font-weight:300;'
+        'color:rgba(232,228,220,.94);line-height:1.3;'
         'text-shadow:0 0 60px rgba(140,180,240,.3);">'
         '它如何总结<br>这些声音？</div>'
-        '<div style="font-family:Inter,sans-serif;font-size:.78rem;font-weight:300;'
-        'color:rgba(232,228,220,.48);margin-top:1.5rem;letter-spacing:.14em;'
-        'animation:pageIn 1.2s ease .5s both;">'
+        '<div style="font-family:Inter,sans-serif;font-size:.75rem;font-weight:300;'
+        'color:rgba(232,228,220,.42);margin-top:.7rem;letter-spacing:.12em;">'
         '问卷摘要 &nbsp;·&nbsp; 会议纪要 &nbsp;·&nbsp; AI 群体意见汇总'
         '</div></div>',
         unsafe_allow_html=True,
@@ -1454,7 +1453,7 @@ def page_revision() -> None:
                 unsafe_allow_html=True,
             )
 
-    st.markdown("<div style='height:3rem;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:1.2rem;'></div>", unsafe_allow_html=True)
     cols = st.columns([1, 3, 1])
     with cols[0]:
         if st.button("← 返回", key="back_10_from_11"):
