@@ -69,16 +69,20 @@ iframe { border:none !important; display:block; }
 # STEP PAGES
 # ═══════════════════════════════════════════════════════════════════════════
 
-def _scroll_top() -> None:
-    """Inject JS to scroll the Streamlit main pane back to the top."""
-    import streamlit.components.v1 as _cv1
-    _cv1.html(
-        "<script>"
-        "var el=window.parent.document.querySelector('section.main');"
-        "if(el)el.scrollTop=0;"
-        "</script>",
-        height=0,
-    )
+def _scroll_top_on_step_change(step: int) -> None:
+    """Scroll to top whenever we land on a new step. Must be called at page-render time."""
+    if st.session_state.get("_rendered_step") != step:
+        st.session_state["_rendered_step"] = step
+        import streamlit.components.v1 as _cv1
+        _cv1.html(
+            "<script>"
+            "setTimeout(function(){"
+            "var m=window.parent.document.querySelector('section.main');"
+            "if(m)m.scrollTop=0;"
+            "},60);"
+            "</script>",
+            height=0,
+        )
 
 
 def _nav(back_step: int | None, forward_label: str = "下一步 →",
@@ -89,7 +93,6 @@ def _nav(back_step: int | None, forward_label: str = "下一步 →",
     with cols[0]:
         if back_step is not None:
             if st.button("← 返回", key=f"back_{back_step}"):
-                _scroll_top()
                 st.session_state["step"] = back_step
                 st.rerun()
         else:
@@ -108,8 +111,6 @@ def _nav(back_step: int | None, forward_label: str = "下一步 →",
             type="primary" if forward_primary else "secondary",
             disabled=forward_disabled,
         )
-    if clicked:
-        _scroll_top()
     return clicked
 
 
@@ -196,6 +197,7 @@ def _animate_expanders() -> None:
 
 # ── Step 1: Source upload ────────────────────────────────────────────────────
 def page_source() -> None:
+    _scroll_top_on_step_change(1)
     _progress_bar(1)
     _wordmark()
     _demo_guide(1)
@@ -304,6 +306,7 @@ def page_source() -> None:
 
 # ── Step 2: AI summary ───────────────────────────────────────────────────────
 def page_summary() -> None:
+    _scroll_top_on_step_change(2)
     _progress_bar(2)
     _wordmark()
 
@@ -353,6 +356,7 @@ def page_summary() -> None:
 
 # ── Step 3: Authorization ────────────────────────────────────────────────────
 def page_auth() -> None:
+    _scroll_top_on_step_change(3)
     _progress_bar(3)
     _wordmark()
     step_header(
@@ -441,6 +445,7 @@ def page_auth() -> None:
 
 # ── Step 4: Processing ───────────────────────────────────────────────────────
 def page_processing() -> None:
+    _scroll_top_on_step_change(4)
     _progress_bar(4)
     _wordmark()
     step_header(
@@ -566,6 +571,7 @@ def page_overview() -> None:
     if not passport:
         st.session_state["step"] = 1; st.rerun(); return
 
+    _scroll_top_on_step_change(5)
     _progress_bar(5)
     _wordmark()
 
@@ -574,15 +580,14 @@ def page_overview() -> None:
     label_zh = FINAL_STATUS_ZH.get(passport.final_status, "未知")
     sentence = final_status_sentence(passport.final_status)
 
-    # Dramatic verdict — centered, breathing
     st.markdown(
-        '<div style="text-align:center;padding:2.5rem 1rem 1rem;">'
+        '<div style="text-align:center;padding:1rem 1rem .6rem;">'
         '<div style="font-family:\'JetBrains Mono\',monospace;font-size:.55rem;'
-        'letter-spacing:.28em;color:rgba(232,228,220,.35);margin-bottom:1.2rem;">05 / 结 论</div>'
-        '<div style="margin-bottom:1.4rem;">' + badge(label_zh, badge_cls) + '</div>'
+        'letter-spacing:.28em;color:rgba(232,228,220,.35);margin-bottom:.7rem;">05 / 结 论</div>'
+        '<div style="margin-bottom:.8rem;">' + badge(label_zh, badge_cls) + '</div>'
         '<div style="font-family:\'Cormorant Garamond\',serif;'
-        'font-size:clamp(1.4rem,3.2vw,2rem);font-weight:300;'
-        'color:rgba(232,228,220,.88);line-height:1.65;max-width:560px;margin:0 auto;">'
+        'font-size:clamp(1.1rem,2.5vw,1.5rem);font-weight:300;'
+        'color:rgba(232,228,220,.88);line-height:1.6;max-width:520px;margin:0 auto;">'
         + sentence + '</div></div>',
         unsafe_allow_html=True,
     )
@@ -624,11 +629,11 @@ def page_overview() -> None:
     for i, (num, denom, label, sub, color) in enumerate(metrics):
         delay = 0.18 + i * 0.2
         items_html += (
-            f'<div style="display:flex;align-items:baseline;gap:1.2rem;'
-            f'padding:1.4rem 0;border-bottom:1px solid rgba(232,228,220,.05);'
+            f'<div style="display:flex;align-items:baseline;gap:1rem;'
+            f'padding:.8rem 0;border-bottom:1px solid rgba(232,228,220,.05);'
             f'opacity:0;animation:revealItem .65s cubic-bezier(.22,1,.36,1) {delay:.2f}s forwards;">'
-            f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:2.6rem;'
-            f'color:{color};line-height:1;min-width:3.5rem;">{num}'
+            f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:2rem;'
+            f'color:{color};line-height:1;min-width:3rem;">{num}'
             f'<span style="font-size:1rem;color:rgba(232,228,220,.22);">{denom}</span></div>'
             f'<div style="padding-bottom:.1rem;">'
             f'<div style="font-family:Inter,sans-serif;font-size:.88rem;font-weight:300;'
@@ -639,16 +644,15 @@ def page_overview() -> None:
         )
 
     st.markdown(
-        f'<div style="max-width:500px;margin:1.5rem auto 0;padding:0 1.5rem;">'
+        f'<div style="max-width:500px;margin:.8rem auto 0;padding:0 1.5rem;">'
         f'{items_html}</div>',
         unsafe_allow_html=True,
     )
 
     st.markdown(
         '<div style="text-align:center;font-family:\'Cormorant Garamond\',serif;'
-        'font-size:.82rem;color:rgba(232,228,220,.50);letter-spacing:.06em;'
-        'font-style:italic;margin:1.8rem 0 .5rem;'
-        'opacity:0;animation:revealItem .6s ease .78s forwards;">'
+        'font-size:.8rem;color:rgba(232,228,220,.45);letter-spacing:.06em;'
+        'font-style:italic;margin:.8rem 0 .2rem;">'
         '展开各维度审计细节 →</div>',
         unsafe_allow_html=True,
     )
@@ -672,6 +676,7 @@ def page_source_detail() -> None:
     if not passport:
         st.session_state["step"] = 5; st.rerun(); return
 
+    _scroll_top_on_step_change(6)
     _progress_bar(6)
     _wordmark()
     step_header(
@@ -713,65 +718,78 @@ def page_source_detail() -> None:
         unsafe_allow_html=True,
     )
 
+    _STATUS_COLOR = {
+        SupportStatus.DIRECTLY_SUPPORTED: "rgba(80,160,120,.8)",
+        SupportStatus.PARTIALLY_SUPPORTED: "rgba(176,126,48,.8)",
+        SupportStatus.INFERRED: "rgba(110,170,210,.8)",
+        SupportStatus.UNSUPPORTED: "rgba(192,80,80,.8)",
+        SupportStatus.CONTRADICTED: "rgba(192,80,80,.8)",
+    }
+    claims_html = '<div style="max-height:56vh;overflow-y:auto;padding-right:.4rem;">'
     for i, bundle in enumerate(trace.evidence_bundles):
         status = bundle.final_support_status
         lbl = SUPPORT_LABEL[status]
         bcls = SUPPORT_BADGE[status]
-        card_map = {
-            SupportStatus.DIRECTLY_SUPPORTED: "m-card-ok",
-            SupportStatus.PARTIALLY_SUPPORTED: "m-card-warn",
-            SupportStatus.INFERRED: "m-card-accent",
-            SupportStatus.UNSUPPORTED: "m-card-risk",
-            SupportStatus.CONTRADICTED: "m-card-risk",
-        }
-        card_cls = card_map.get(status, "m-card")
+        sc = _STATUS_COLOR.get(status, "rgba(150,155,165,.6)")
+        is_risk = status in {SupportStatus.UNSUPPORTED, SupportStatus.CONTRADICTED}
+        open_attr = "open" if is_risk else ""
 
-        with st.expander(
-            f"主张 {i+1}  ·  {bundle.claim.text[:55]}{'…' if len(bundle.claim.text)>55 else ''}",
-            expanded=(status in {SupportStatus.UNSUPPORTED, SupportStatus.CONTRADICTED}),
-        ):
-            st.markdown(
-                f'<div class="{card_cls}">'
-                f'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
-                f'<div style="font-size:.95rem;font-weight:400;color:rgba(232,228,220,.9);'
-                f'max-width:75%;line-height:1.55;">{bundle.claim.text}</div>'
-                f'<div style="text-align:right;">{badge(lbl, bcls)}'
-                f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:.68rem;'
-                f'color:rgba(232,228,220,.45);margin-top:.3rem;">{status.value}</div></div>'
-                f"</div>",
-                unsafe_allow_html=True,
+        matches_html = ""
+        for m in bundle.candidate_matches[:3]:
+            cond_note = (f'&nbsp;<span style="background:rgba(192,80,80,.2);'
+                         f'border-radius:3px;padding:.1rem .4rem;font-size:.68rem;'
+                         f'color:rgba(192,80,80,.9);">条件已删除</span>'
+                         if m.condition_preserved is False else "")
+            matches_html += (
+                f'<div style="background:rgba(0,0,0,.18);border:1px solid rgba(232,228,220,.08);'
+                f'border-radius:4px;padding:.5rem .7rem;margin-top:.4rem;">'
+                f'<span style="font-family:\'JetBrains Mono\',monospace;font-size:.62rem;'
+                f'color:rgba(110,170,210,.8);">{m.source_id}</span>'
+                f'&nbsp;&nbsp;{badge(SUPPORT_LABEL[m.support_status], SUPPORT_BADGE[m.support_status])}{cond_note}'
+                f'<div style="margin-top:.3rem;font-size:.82rem;color:rgba(232,228,220,.68);">{m.source_text}</div>'
+                f'<div style="margin-top:.2rem;font-size:.75rem;color:rgba(232,228,220,.5);">{m.explanation}</div>'
+                f'</div>'
             )
-            if bundle.claim.quantifier:
-                q_ok = bundle.quantifier_assessment and bundle.quantifier_assessment.supported
-                st.markdown(
-                    f'<div style="margin-top:.6rem;font-size:.8rem;color:rgba(232,228,220,.45);">'
-                    f'数量词 <code>{bundle.claim.quantifier}</code> &nbsp;'
-                    + badge("已验证", "b-ok" if q_ok else "b-risk")
-                    + ("" if not bundle.quantifier_assessment else
-                       f'<span style="margin-left:.6rem;color:rgba(232,228,220,.58);font-size:.78rem;">'
-                       f'{bundle.quantifier_assessment.explanation}</span>')
-                    + "</div>",
-                    unsafe_allow_html=True,
-                )
-            for m in bundle.candidate_matches[:3]:
-                cond_note = ""
-                if m.condition_preserved is False:
-                    cond_note = " &nbsp;" + badge("条件已删除", "b-risk")
-                st.markdown(
-                    f'<div style="background:rgba(0,0,0,.18);border:1px solid rgba(232,228,220,.09);'
-                    f'border-radius:4px;padding:.6rem .8rem;margin-top:.4rem;">'
-                    f'<span style="font-family:\'JetBrains Mono\',monospace;font-size:.65rem;'
-                    f'color:rgba(110,170,210,.8);">{m.source_id}</span>'
-                    f'&nbsp;&nbsp;{badge(SUPPORT_LABEL[m.support_status], SUPPORT_BADGE[m.support_status])}{cond_note}'
-                    f'<div style="margin-top:.35rem;font-size:.84rem;color:rgba(232,228,220,.7);">{m.source_text}</div>'
-                    f'<div style="margin-top:.25rem;font-size:.78rem;color:rgba(232,228,220,.58);">{m.explanation}</div>'
-                    f"</div>",
-                    unsafe_allow_html=True,
-                )
-            if bundle.warnings:
-                for w in bundle.warnings:
-                    st.warning(w)
-            st.markdown("</div>", unsafe_allow_html=True)
+
+        q_html = ""
+        if bundle.claim.quantifier:
+            q_ok = bundle.quantifier_assessment and bundle.quantifier_assessment.supported
+            expl = bundle.quantifier_assessment.explanation if bundle.quantifier_assessment else ""
+            q_html = (
+                f'<div style="margin-top:.5rem;font-size:.78rem;color:rgba(232,228,220,.45);">'
+                f'数量词 <code>{bundle.claim.quantifier}</code>&nbsp;'
+                + badge("已验证", "b-ok" if q_ok else "b-risk")
+                + (f'<span style="margin-left:.5rem;color:rgba(232,228,220,.55);">{expl}</span>' if expl else "")
+                + "</div>"
+            )
+
+        warn_html = "".join(
+            f'<div style="background:rgba(176,126,48,.12);border-left:2px solid rgba(176,126,48,.5);'
+            f'padding:.4rem .7rem;margin-top:.4rem;font-size:.78rem;color:rgba(232,228,220,.7);">{w}</div>'
+            for w in (bundle.warnings or [])
+        )
+
+        claims_html += (
+            f'<details {open_attr} style="border-left:2px solid {sc};'
+            f'border-radius:0 4px 4px 0;background:rgba(0,0,0,.15);'
+            f'margin-bottom:.5rem;overflow:hidden;">'
+            f'<summary style="cursor:pointer;padding:.65rem .9rem;list-style:none;'
+            f'display:flex;justify-content:space-between;align-items:center;">'
+            f'<span style="font-size:.82rem;color:rgba(232,228,220,.78);'
+            f'font-family:\'JetBrains Mono\',monospace;font-size:.62rem;'
+            f'color:rgba(232,228,220,.45);margin-right:.6rem;">#{i+1}</span>'
+            f'<span style="font-size:.88rem;color:rgba(232,228,220,.85);flex:1;'
+            f'line-height:1.4;">{bundle.claim.text[:80]}{"…" if len(bundle.claim.text)>80 else ""}</span>'
+            f'<span style="flex-shrink:0;margin-left:.8rem;">{badge(lbl, bcls)}</span>'
+            f'</summary>'
+            f'<div style="padding:.6rem .9rem .8rem;border-top:1px solid rgba(232,228,220,.06);">'
+            f'<div style="font-size:.9rem;color:rgba(232,228,220,.82);line-height:1.55;'
+            f'margin-bottom:.4rem;">{bundle.claim.text}</div>'
+            f'{q_html}{matches_html}{warn_html}'
+            f'</div></details>'
+        )
+    claims_html += '</div>'
+    st.markdown(claims_html, unsafe_allow_html=True)
 
     if _nav(back_step=5, forward_label="→ 声音地图"):
         st.session_state["step"] = 7
@@ -784,6 +802,7 @@ def page_voice_map() -> None:
     if not passport:
         st.session_state["step"] = 5; st.rerun(); return
 
+    _scroll_top_on_step_change(7)
     _progress_bar(7)
     _wordmark()
     step_header(
@@ -808,53 +827,60 @@ def page_voice_map() -> None:
         key=lambda a: (order.get(a.status, 9), not a.is_normatively_salient),
     )
 
+    _COVER_COLOR = {
+        CoverageStatus.COVERED: "rgba(80,160,120,.7)",
+        CoverageStatus.WEAKENED: "rgba(176,126,48,.7)",
+        CoverageStatus.DISTORTED: "rgba(192,80,80,.7)",
+        CoverageStatus.OMITTED: "rgba(192,80,80,.7)",
+    }
+    voice_html = '<div style="max-height:56vh;overflow-y:auto;padding-right:.4rem;">'
     for assessment in sorted_a:
         cluster = cluster_lookup.get(assessment.cluster_id)
         if not cluster:
             continue
         status = assessment.status
-        card_cls = COVERAGE_CARD.get(status, "m-card")
         lbl = COVERAGE_LABEL[status]
         bcls = COVERAGE_BADGE[status]
+        sc = _COVER_COLOR.get(status, "rgba(150,155,165,.6)")
+        is_open = status in {CoverageStatus.OMITTED, CoverageStatus.DISTORTED}
+        open_attr = "open" if is_open else ""
 
-        tags = []
-        if cluster.is_normatively_salient:
-            tags.append(badge("规范重要性", "b-gold"))
-        if cluster.is_procedural:
-            tags.append(badge("程序性诉求", "b-accent"))
-        if cluster.is_minority:
-            tags.append(badge("少数意见", "b-muted"))
-        tags_html = " ".join(tags)
-
+        tags_html = " ".join([
+            badge("规范重要性", "b-gold") if cluster.is_normatively_salient else "",
+            badge("程序性诉求", "b-accent") if cluster.is_procedural else "",
+            badge("少数意见", "b-muted") if cluster.is_minority else "",
+        ]).strip()
         stances = " / ".join(f"{k}:{v}" for k, v in cluster.stance_distribution.items()) or "—"
 
-        with st.expander(
-            f"{cluster.label}  ·  {lbl}",
-            expanded=(status in {CoverageStatus.OMITTED, CoverageStatus.DISTORTED}),
-        ):
-            st.markdown(
-                f'<div class="{card_cls}">'
-                f'<div style="display:flex;justify-content:space-between;margin-bottom:.6rem;">'
-                f'<span style="font-size:1rem;font-weight:500;color:rgba(232,228,220,.9);">{cluster.label}</span>'
-                f'<div>{tags_html}</div></div>'
-                f'<div style="font-size:.82rem;color:rgba(232,228,220,.60);margin-bottom:.5rem;">'
-                f'涉及 <b style="color:rgba(232,228,220,.88);">{cluster.unique_participant_count}</b> 位参与者'
-                f'&nbsp;·&nbsp;立场 {stances}&nbsp;·&nbsp;{badge(lbl, bcls)}</div>',
-                unsafe_allow_html=True,
-            )
-            for src_id, quote in zip(cluster.source_ids[:2],
-                                      cluster.representative_quotes[:2], strict=False):
-                st.markdown(
-                    f'<div class="m-quote">'
-                    f'<span style="font-family:\'JetBrains Mono\',monospace;font-size:.68rem;'
-                    f'color:rgba(110,170,210,.82);font-style:normal;">{src_id}</span> {quote}</div>',
-                    unsafe_allow_html=True,
-                )
-            st.markdown(
-                f'<div style="font-size:.78rem;color:rgba(232,228,220,.55);margin-top:.4rem;">'
-                f'{assessment.explanation}</div></div>',
-                unsafe_allow_html=True,
-            )
+        quotes_html = "".join(
+            f'<div style="font-style:italic;font-size:.86rem;color:rgba(232,228,220,.65);'
+            f'padding:.3rem 0;border-bottom:1px solid rgba(232,228,220,.05);">'
+            f'<span style="font-family:\'JetBrains Mono\',monospace;font-size:.62rem;'
+            f'color:rgba(110,170,210,.8);font-style:normal;">{src_id}</span> {quote}</div>'
+            for src_id, quote in zip(cluster.source_ids[:2], cluster.representative_quotes[:2], strict=False)
+        )
+
+        voice_html += (
+            f'<details {open_attr} style="border-left:2px solid {sc};'
+            f'border-radius:0 4px 4px 0;background:rgba(0,0,0,.15);'
+            f'margin-bottom:.5rem;overflow:hidden;">'
+            f'<summary style="cursor:pointer;padding:.65rem .9rem;list-style:none;'
+            f'display:flex;justify-content:space-between;align-items:center;gap:.6rem;">'
+            f'<span style="font-size:.9rem;color:rgba(232,228,220,.85);flex:1;">{cluster.label}</span>'
+            f'<span style="flex-shrink:0;">{badge(lbl, bcls)}</span>'
+            f'</summary>'
+            f'<div style="padding:.6rem .9rem .8rem;border-top:1px solid rgba(232,228,220,.06);">'
+            f'<div style="font-size:.78rem;color:rgba(232,228,220,.55);margin-bottom:.4rem;">'
+            f'涉及 <b style="color:rgba(232,228,220,.82);">{cluster.unique_participant_count}</b> 位参与者'
+            f'&nbsp;·&nbsp;立场 {stances}</div>'
+            f'<div style="margin-bottom:.5rem;">{tags_html}</div>'
+            f'{quotes_html}'
+            f'<div style="font-size:.76rem;color:rgba(232,228,220,.5);margin-top:.5rem;">'
+            f'{assessment.explanation}</div>'
+            f'</div></details>'
+        )
+    voice_html += '</div>'
+    st.markdown(voice_html, unsafe_allow_html=True)
 
     if _nav(back_step=6, forward_label="→ 消失的声音"):
         st.session_state["step"] = 8
@@ -867,6 +893,7 @@ def page_lost_voices() -> None:
     if not passport:
         st.session_state["step"] = 5; st.rerun(); return
 
+    _scroll_top_on_step_change(8)
     _progress_bar(8)
     _wordmark()
 
@@ -885,20 +912,19 @@ def page_lost_voices() -> None:
         -a.participant_count,
     ))
 
-    # Dramatic header
     n_lost = len(lost)
     sub_text = f"这 {n_lost} 个真实主题在 AI 总结中完全消失。" if lost else "未发现完全消失的原始主题。"
     st.markdown(
-        f'<div style="text-align:center;padding:3rem 1rem 2rem;">'
+        f'<div style="text-align:center;padding:1.2rem 1rem .8rem;">'
         f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:.55rem;'
-        f'letter-spacing:.28em;color:rgba(192,80,80,.45);margin-bottom:1.2rem;">08 / 消 失 的 声 音</div>'
+        f'letter-spacing:.28em;color:rgba(192,80,80,.45);margin-bottom:.6rem;">08 / 消 失 的 声 音</div>'
         f'<div style="font-family:\'Cormorant Garamond\',serif;'
-        f'font-size:clamp(2.4rem,5.5vw,3.8rem);font-weight:300;'
-        f'color:rgba(192,80,80,.82);line-height:1.35;'
-        f'text-shadow:0 0 80px rgba(192,80,80,.28);">'
+        f'font-size:clamp(1.8rem,4vw,2.6rem);font-weight:300;'
+        f'color:rgba(192,80,80,.82);line-height:1.25;'
+        f'text-shadow:0 0 60px rgba(192,80,80,.25);">'
         f'有些声音<br>从未被听见</div>'
-        f'<div style="font-family:\'Cormorant Garamond\',serif;font-size:.95rem;font-style:italic;'
-        f'color:rgba(232,228,220,.52);margin-top:1rem;letter-spacing:.04em;">'
+        f'<div style="font-family:\'Cormorant Garamond\',serif;font-size:.88rem;font-style:italic;'
+        f'color:rgba(232,228,220,.48);margin-top:.5rem;letter-spacing:.04em;">'
         f'{sub_text}</div>'
         f'</div>',
         unsafe_allow_html=True,
@@ -916,7 +942,7 @@ def page_lost_voices() -> None:
             unsafe_allow_html=True,
         )
     else:
-        items_html = '<div style="max-width:860px;margin:0 auto;">'
+        items_html = '<div style="max-width:860px;margin:0 auto;max-height:56vh;overflow-y:auto;padding-right:.4rem;">'
         for i, item in enumerate(lost):
             cluster = cluster_lookup.get(item.cluster_id)
             if not cluster:
@@ -981,6 +1007,7 @@ def page_auth_boundary() -> None:
     if not passport:
         st.session_state["step"] = 5; st.rerun(); return
 
+    _scroll_top_on_step_change(9)
     _progress_bar(9)
     _wordmark()
     step_header(
@@ -1119,6 +1146,7 @@ def page_passport() -> None:
     if not passport:
         st.session_state["step"] = 5; st.rerun(); return
 
+    _scroll_top_on_step_change(10)
     _progress_bar(10)
     _wordmark()
     step_header(
@@ -1254,6 +1282,7 @@ def page_passport() -> None:
 
 # ── Step 11: Revision diff ───────────────────────────────────────────────────
 def page_revision() -> None:
+    _scroll_top_on_step_change(11)
     passport = get_passport()
     if not passport:
         st.session_state["step"] = 5; st.rerun(); return
