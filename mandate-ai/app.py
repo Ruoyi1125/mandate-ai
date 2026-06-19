@@ -120,10 +120,10 @@ def _wordmark() -> None:
 
 
 _DEMO_GUIDES: dict[int, str] = {
-    1: "已为你载入样本：某学校AI学业预警系统的真实学生意见，共12条。",
+    1: "已为你载入样本：某学校AI学业预警系统的真实学生意见，共24条。",
     2: "这是AI对上述学生意见的一句话总结——注意它如何将复杂声音简化。",
     3: "这份问卷的采集协议：匿名学生意见，仅供课程研究，不允许公开发布。",
-    4: "MANDATE 正在逐条拆解AI总结，与原始12条意见逐一比对。",
+    4: "MANDATE 正在逐条拆解AI总结，与原始24条意见逐一比对。",
     5: "审计完成。这里是来源可追溯性、代表性覆盖和授权三个维度的综合结论。",
     6: "AI总结中的每项主张是否有原始学生意见支撑？展开查看证据。",
     7: "原始意见涉及哪些主题？AI总结覆盖了哪些，遗漏了哪些？",
@@ -529,7 +529,7 @@ def page_processing() -> None:
         try:
             passport = AuditPipeline(
                 provider=MockProvider(),
-                rules_path=Path("rules/authorization_rules.yaml"),
+                rules_path=Path(__file__).parent / "rules/authorization_rules.yaml",
             ).run(request)
         except Exception as e:  # noqa: BLE001
             st.error(f"审计失败：{e}")
@@ -1469,8 +1469,9 @@ def _handle_demo_prefill() -> None:
     import csv as _csv
     import io as _io
 
-    demo_csv = Path("data/demo/school_ai_warning_sources.csv")
-    demo_txt = Path("data/demo/problematic_summary.txt")
+    _here = Path(__file__).parent
+    demo_csv = _here / "data/demo/school_ai_warning_sources.csv"
+    demo_txt = _here / "data/demo/problematic_summary.txt"
     if demo_csv.exists():
         content = demo_csv.read_text("utf-8-sig")
         from mandate.input_loader import source_records_from_csv
