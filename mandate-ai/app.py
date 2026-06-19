@@ -1305,22 +1305,26 @@ def page_revision() -> None:
 
     with col_r:
         st.markdown(
-            '<div style="font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;'
-            'color:rgba(110,170,210,.65);margin-bottom:.8rem;">MANDATE 忠实修订版</div>',
+            '<div style="font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;'
+            'color:rgba(110,170,210,.5);margin-bottom:.5rem;">MANDATE 忠实修订版</div>',
             unsafe_allow_html=True,
         )
 
-        # One clean disclosure line (no parsing, no duplication)
-        _disc_html = (
-            f'<div style="font-size:.72rem;color:rgba(232,228,220,.38);'
-            f'border-bottom:1px solid rgba(232,228,220,.07);'
-            f'padding-bottom:.6rem;margin-bottom:1.1rem;">'
-            f'本修订版基于 {passport.source_count} 条匿名意见，由 MANDATE 审计，'
-            f'为探索性样本，不代表全体参与者立场。</div>'
-        )
+        # ── Synthesise a flowing paragraph from structured audit data ──────────
+        _COND_KW = {"申诉", "纠错", "复核", "知情", "透明", "退出", "解释", "范围", "机制", "修改", "删除", "审计"}
+        _CONC_KW = {"误判", "标签", "滥用", "泄露", "担忧", "担心", "过度", "风险", "反对", "错误", "坚决"}
 
-        # Rebuild revision as readable final prose (not editorial instructions)
-        _rev_paras: list[str] = []
+        def _core(label: str) -> str:
+            """Return the shortest meaningful phrase from a cluster label."""
+            label = label.split("（")[0].split("(")[0].strip()
+            for sep in ["与", "、", "和"]:
+                if sep in label and len(label.split(sep)[0]) >= 2:
+                    return label.split(sep)[0] + sep + label.split(sep)[1].split(sep)[0]
+            return label[:12]
+
+        _cond_themes, _conc_themes, _miss_themes = [], [], []
+        _weakened_cls, _omit_salient = [], []
+
         if passport.omission_result:
             for _asmt in passport.omission_result.coverage_assessments:
                 _cl = next(
@@ -1329,42 +1333,90 @@ def page_revision() -> None:
                 )
                 if not _cl:
                     continue
-                _q = _cl.representative_quotes[0] if _cl.representative_quotes else ""
-                _n = _cl.unique_participant_count
-                _q_html = (
-                    f'<span style="font-style:italic;color:rgba(232,228,220,.65);">「{_q}」</span>'
-                    if _q else ""
-                )
-                if _asmt.status == CoverageStatus.COVERED:
-                    _rev_paras.append(
-                        f'关于「{_cl.label}」：共 {_n} 名参与者有相关表达，'
-                        f'意见已在总结中如实呈现。'
-                        + (f' 原声示例：{_q_html}' if _q_html else '')
-                    )
-                elif _asmt.status in {CoverageStatus.WEAKENED, CoverageStatus.DISTORTED}:
-                    _rev_paras.append(
-                        f'关于「{_cl.label}」：参与者意见存在明显分歧与限定条件，'
-                        f'修订版如实保留了这种复杂性，未作简化。'
-                        + (f' 原声示例：{_q_html}' if _q_html else '')
-                    )
+                _short = _core(_cl.label)
+                if _asmt.status in {CoverageStatus.WEAKENED, CoverageStatus.DISTORTED}:
+                    _weakened_cls.append(_cl)
                 elif (_asmt.status == CoverageStatus.OMITTED
                       and (_cl.is_normatively_salient or _cl.is_procedural)):
-                    _rev_paras.append(
-                        f'关于「{_cl.label}」：这是 {_n} 名参与者明确提及的重要议题，'
-                        f'原总结未予覆盖，修订版已补入。'
-                        + (f' 原声示例：{_q_html}' if _q_html else '')
-                    )
+                    _omit_salient.append(_cl)
+                    _miss_themes.append(_short)
+                    if any(kw in _cl.label for kw in _COND_KW):
+                        _cond_themes.append(_short)
+                    elif any(kw in _cl.label for kw in _CONC_KW):
+                        _conc_themes.append(_short)
+                    else:
+                        q0 = (_cl.representative_quotes or [""])[0]
+                        (_conc_themes if any(kw in q0 for kw in _CONC_KW) else _cond_themes).append(_short)
 
-        _body_html = "".join(
-            f'<p style="margin-bottom:1rem;line-height:1.9;">{p}</p>'
-            for p in _rev_paras
-        ) if _rev_paras else '<p style="color:rgba(232,228,220,.4);">未生成修订内容。</p>'
+        # Representative quotes for inline colour
+        _w_quotes = [
+            c.representative_quotes[0] for c in _weakened_cls if c.representative_quotes
+        ]
+        _o_quotes = [
+            c.representative_quotes[0] for c in _omit_salient
+            if c.representative_quotes and any(kw in c.representative_quotes[0] for kw in _CONC_KW)
+        ]
+
+        # Build paragraph sentence by sentence
+        _sents: list[str] = []
+
+        # 1. Opening — characterise overall stance
+        if _weakened_cls:
+            _sents.append(
+                "参与者的整体态度存在明显分歧，并非普遍支持；"
+                "原总结简化了意见中的前提条件与立场差异。"
+            )
+        elif _omit_salient:
+            _sents.append("原总结覆盖了主要意见方向，但遗漏了若干重要的程序性与规范性声音。")
+        else:
+            _sents.append("原总结基本忠实呈现了参与者意见。")
+
+        # 2. Support conditions vs concerns
+        if _cond_themes and _conc_themes:
+            _sents.append(
+                f"支持者通常附有前提条件，包括{'、'.join(_cond_themes[:4])}；"
+                f"反对或持保留态度者主要担忧{'、'.join(_conc_themes[:3])}。"
+            )
+        elif _cond_themes:
+            _sents.append(f"参与者的支持往往依赖明确条件：{'、'.join(_cond_themes[:4])}。")
+        elif _conc_themes:
+            _sents.append(f"主要担忧集中于{'、'.join(_conc_themes[:3])}。")
+
+        # 3. Unsupported removed claims
+        if revision and revision.removed_claims:
+            _rt = [claim_map.get(cid, "") for cid in revision.removed_claims if claim_map.get(cid)]
+            if _rt:
+                _sents.append(f"「{_rt[0]}」的表述在原始意见中缺乏依据，修订版已删除。")
+
+        # 4. Additional missing topics not captured above
+        _extra_miss = [t for t in _miss_themes if t not in _cond_themes and t not in _conc_themes]
+        if _extra_miss:
+            _sents.append(f"{'、'.join(_extra_miss[:3])}等议题在原总结中完全缺席，修订版已补入。")
+
+        _synthesis = "".join(_sents) or "修订内容已整合，未发现需要重大修正的地方。"
+
+        # Optional inline voice sample
+        _voice_sample = ""
+        if _w_quotes:
+            _voice_sample = (
+                f'<div style="margin-top:1.2rem;padding:.8rem 1rem;'
+                f'border-left:2px solid rgba(110,170,210,.3);'
+                f'font-style:italic;font-size:.88rem;color:rgba(232,228,220,.6);">'
+                + "<br>".join(f"「{q}」" for q in (_w_quotes + _o_quotes)[:3])
+                + '</div>'
+            )
 
         st.markdown(
-            f'<div class="m-paper-doc" style="border-top:2px solid rgba(110,170,210,.45);'
-            f'padding:1.4rem 1.6rem;font-family:\'Cormorant Garamond\',serif;'
-            f'font-size:.95rem;color:rgba(232,228,220,.9);">'
-            f'{_disc_html}{_body_html}</div>',
+            f'<div style="border-top:2px solid rgba(110,170,210,.55);'
+            f'padding:1.6rem 1.8rem 1.4rem;background:rgba(110,170,210,.04);'
+            f'border-radius:0 0 6px 6px;">'
+            f'<div style="font-family:\'Cormorant Garamond\',serif;'
+            f'font-size:1.08rem;line-height:2;color:rgba(232,228,220,.95);'
+            f'font-weight:400;">{_synthesis}</div>'
+            f'{_voice_sample}'
+            f'<div style="margin-top:1rem;font-size:.68rem;color:rgba(232,228,220,.3);">'
+            f'基于 {passport.source_count} 条匿名意见 · MANDATE 审计 · 探索性样本，不代表全体参与者立场</div>'
+            f'</div>',
             unsafe_allow_html=True,
         )
 
