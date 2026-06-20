@@ -175,7 +175,7 @@ html { background: #040810 !important; min-height: 100vh !important; }
 body {
   background: transparent !important;
   background-color: transparent !important;
-  color: rgba(232,228,220,.9) !important;
+  color: rgba(232,228,220,.95) !important;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -250,11 +250,39 @@ h1,h2,h3 { color: rgba(232,228,220,.95) !important; }
   background: rgba(255,255,255,.06) !important;
 }
 
+/* Mobile / Safari: force text colour & fix autofill white-on-white */
+.stTextInput > div > div > input,
+.stTextArea > div > div > textarea {
+  -webkit-text-fill-color: rgba(232,228,220,.92) !important;
+}
+.stTextInput > div > div > input::placeholder,
+.stTextArea > div > div > textarea::placeholder {
+  color: rgba(232,228,220,.28) !important;
+  -webkit-text-fill-color: rgba(232,228,220,.28) !important;
+}
+.stTextInput > div > div > input:-webkit-autofill,
+.stTextInput > div > div > input:-webkit-autofill:hover,
+.stTextInput > div > div > input:-webkit-autofill:focus,
+.stTextArea > div > div > textarea:-webkit-autofill,
+.stTextArea > div > div > textarea:-webkit-autofill:hover,
+.stTextArea > div > div > textarea:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px rgba(6,10,22,.97) inset !important;
+  -webkit-text-fill-color: rgba(232,228,220,.92) !important;
+  caret-color: rgba(232,228,220,.7) !important;
+}
+@media (max-width: 768px) {
+  .stTextInput > div > div > input,
+  .stTextArea > div > div > textarea {
+    background: rgba(6,10,22,.9) !important;
+    -webkit-text-fill-color: rgba(232,228,220,.92) !important;
+  }
+}
+
 /* ── Labels ─────────────────────────────────────────────────────── */
 .stTextInput label, .stTextArea label,
 .stCheckbox label span, .stRadio label span,
 .stFileUploader label, .stSelectbox label {
-  color: rgba(232,228,220,.4) !important;
+  color: rgba(232,228,220,.5) !important;
   font-family: 'Inter', sans-serif !important;
   font-size: .7rem !important;
   font-weight: 400 !important;

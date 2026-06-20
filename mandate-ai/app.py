@@ -1334,8 +1334,15 @@ def page_revision() -> None:
 
     with col_r:
         st.markdown(
-            '<div style="font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;'
-            'color:rgba(110,170,210,.5);margin-bottom:.5rem;">MANDATE 忠实修订版</div>',
+            '<div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem;">'
+            '<div style="font-family:\'Cormorant Garamond\',serif;font-size:1.05rem;'
+            'font-weight:300;color:rgba(110,170,210,.88);letter-spacing:.03em;">'
+            'MANDATE 忠实修订版</div>'
+            '<div style="font-size:.5rem;letter-spacing:.1em;padding:.18em .6em;'
+            'border:1px solid rgba(110,170,210,.32);border-radius:3px;'
+            'color:rgba(110,170,210,.65);font-family:\'JetBrains Mono\',monospace;'
+            'text-transform:uppercase;">最终版本</div>'
+            '</div>',
             unsafe_allow_html=True,
         )
 
@@ -1415,12 +1422,12 @@ def page_revision() -> None:
         if revision and revision.removed_claims:
             _rt = [claim_map.get(cid, "") for cid in revision.removed_claims if claim_map.get(cid)]
             if _rt:
-                _sents.append(f"「{_rt[0]}」的表述在原始意见中缺乏依据，修订版已删除。")
+                _sents.append(f"「{_rt[0]}」的表述在原始意见中缺乏依据。")
 
         # 4. Additional missing topics not captured above
         _extra_miss = [t for t in _miss_themes if t not in _cond_themes and t not in _conc_themes]
         if _extra_miss:
-            _sents.append(f"{'、'.join(_extra_miss[:3])}等议题在原总结中完全缺席，修订版已补入。")
+            _sents.append(f"{'、'.join(_extra_miss[:3])}等议题在原总结中未曾提及。")
 
         _synthesis = "".join(_sents) or "修订内容已整合，未发现需要重大修正的地方。"
 
@@ -1436,11 +1443,12 @@ def page_revision() -> None:
             )
 
         st.markdown(
-            f'<div style="border-top:2px solid rgba(110,170,210,.55);'
-            f'padding:1.6rem 1.8rem 1.4rem;background:rgba(110,170,210,.04);'
-            f'border-radius:0 0 6px 6px;">'
+            f'<div style="border:1px solid rgba(110,170,210,.2);'
+            f'border-top:3px solid rgba(110,170,210,.75);'
+            f'padding:1.6rem 1.8rem 1.4rem;background:rgba(110,170,210,.06);'
+            f'border-radius:0 0 8px 8px;">'
             f'<div style="font-family:\'Cormorant Garamond\',serif;'
-            f'font-size:1.08rem;line-height:2;color:rgba(232,228,220,.95);'
+            f'font-size:1.2rem;line-height:2.05;color:rgba(232,228,220,.97);'
             f'font-weight:400;">{_synthesis}</div>'
             f'{_voice_sample}'
             f'<div style="margin-top:1rem;font-size:.68rem;color:rgba(232,228,220,.3);">'
@@ -1477,7 +1485,7 @@ def page_revision() -> None:
                     f'color:{ic};font-family:\'JetBrains Mono\',monospace;margin-bottom:.4rem;">{title}</div>'
                     f'<div style="font-size:.92rem;color:rgba(232,228,220,.85);line-height:1.7;'
                     f'font-family:\'Cormorant Garamond\',serif;font-style:italic;">{detail}</div>'
-                    f'<div style="font-size:.73rem;color:rgba(232,228,220,.48);margin-top:.3rem;'
+                    f'<div style="font-size:.73rem;color:rgba(232,228,220,.6);margin-top:.3rem;'
                     f'font-family:Inter,sans-serif;line-height:1.5;">{reason}</div>'
                     f'</div></div>'
                 )
