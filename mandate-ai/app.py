@@ -173,40 +173,25 @@ _DEMO_GUIDES: dict[int, str] = {
 
 
 def _demo_guide(step: int) -> None:
-    """Floating demo card — pure CSS checkbox toggle + CSS auto-fade. No JS dependency."""
+    """Floating demo card — fades in, auto-closes after 5 s via CSS animation."""
     if not st.session_state.get("demo_mode"):
         return
     text = _DEMO_GUIDES.get(step, "")
     if not text:
         return
-    cb = f"dg-cb-{step}"
     st.markdown(
-        # CSS: sibling rule hides card when checkbox is checked; auto-fade after 5 s
         f'<style>'
-        f'#{cb}:checked ~ .dg-wrap-{step} {{ opacity:0 !important; pointer-events:none !important; }}'
-        f'.dg-card-{step} {{ animation:pageIn .7s ease .35s both, dgFade .45s ease 5.35s forwards; }}'
-        f'@keyframes dgFade {{ to {{ opacity:0; pointer-events:none; }} }}'
+        f'.dg-card-{step}{{animation:pageIn .7s ease .35s both,dgFade .45s ease 5.35s forwards;}}'
+        f'@keyframes dgFade{{to{{opacity:0;pointer-events:none;}}}}'
         f'</style>'
-        # Outer fixed-position container
         f'<div style="position:fixed;top:3.8rem;right:1.5rem;z-index:500;max-width:215px;">'
-        # Hidden checkbox — toggled by label click (pure HTML, no JS)
-        f'<input type="checkbox" id="{cb}" style="position:absolute;opacity:0;width:0;height:0;">'
-        # Everything else is a sibling of the checkbox — hidden via CSS :checked ~ rule
-        f'<div class="dg-wrap-{step}" '
-        f'style="transition:opacity .3s ease;">'
         f'<div class="dg-card-{step}" '
         f'style="background:rgba(10,15,32,.93);border:1px solid rgba(140,180,240,.2);'
-        f'border-radius:6px;padding:.65rem .9rem;backdrop-filter:blur(12px);position:relative;">'
-        # ✕ label (points to checkbox — clicking it checks it → CSS hides card)
-        f'<label for="{cb}" '
-        f'style="position:absolute;top:.28rem;right:.42rem;cursor:pointer;'
-        f'color:rgba(232,228,220,.38);font-size:.76rem;line-height:1;'
-        f'padding:0 2px;user-select:none;z-index:1;">✕</label>'
+        f'border-radius:6px;padding:.65rem .9rem;backdrop-filter:blur(12px);">'
         f'<div style="font-family:JetBrains Mono,monospace;font-size:.44rem;'
         f'letter-spacing:.2em;color:rgba(140,180,240,.55);margin-bottom:.3rem;">演 示 说 明</div>'
         f'<div style="font-size:.68rem;font-weight:300;'
         f'color:rgba(232,228,220,.62);line-height:1.6;">{text}</div>'
-        f'</div>'
         f'</div>'
         f'</div>',
         unsafe_allow_html=True,
