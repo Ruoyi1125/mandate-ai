@@ -135,6 +135,20 @@ def _wordmark() -> None:
     )
 
 
+def _mini_header(num: str, zh: str, title: str) -> None:
+    """Compact single-row heading for data-heavy pages that must fit in one viewport."""
+    st.markdown(
+        f'<div style="text-align:center;padding:.55rem 1rem .45rem;">'
+        f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:.52rem;'
+        f'letter-spacing:.24em;color:rgba(232,228,220,.35);margin-bottom:.28rem;">{num} / {zh}</div>'
+        f'<div style="font-family:\'Cormorant Garamond\',serif;'
+        f'font-size:clamp(1.3rem,2.6vw,1.85rem);font-weight:300;'
+        f'color:rgba(232,228,220,.92);line-height:1.2;">{title}</div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+
 _DEMO_GUIDES: dict[int, str] = {
     1: "已为你载入样本：某学校AI学业预警系统的真实学生意见，共24条。",
     2: "这是AI对上述学生意见的一句话总结——注意它如何将复杂声音简化。",
@@ -151,21 +165,28 @@ _DEMO_GUIDES: dict[int, str] = {
 
 
 def _demo_guide(step: int) -> None:
-    """Floating demo context card — only shown in demo mode."""
+    """Floating demo context card — only shown in demo mode. Has an X to dismiss."""
     if not st.session_state.get("demo_mode"):
         return
     text = _DEMO_GUIDES.get(step, "")
     if not text:
         return
+    card_id = f"dg-{step}"
     st.markdown(
-        f'<div style="position:fixed;bottom:6.5rem;left:1.5rem;z-index:200;max-width:230px;'
-        f'opacity:0;animation:pageIn .7s ease .5s forwards;pointer-events:none;">'
-        f'<div style="background:rgba(10,15,32,.9);border:1px solid rgba(140,180,240,.14);'
-        f'border-radius:6px;padding:.7rem .95rem;backdrop-filter:blur(12px);">'
+        f'<div id="{card_id}" style="position:fixed;bottom:6.5rem;left:1.5rem;z-index:200;'
+        f'max-width:230px;opacity:0;animation:pageIn .7s ease .5s forwards;">'
+        f'<div style="background:rgba(10,15,32,.92);border:1px solid rgba(140,180,240,.14);'
+        f'border-radius:6px;padding:.7rem .95rem .7rem .95rem;backdrop-filter:blur(12px);'
+        f'position:relative;">'
+        f'<button onclick="document.getElementById(\'{card_id}\').style.display=\'none\'" '
+        f'style="position:absolute;top:.28rem;right:.4rem;background:none;border:none;'
+        f'cursor:pointer;color:rgba(232,228,220,.3);font-size:.72rem;line-height:1;padding:0;" '
+        f'onmouseover="this.style.color=\'rgba(232,228,220,.7)\'" '
+        f'onmouseout="this.style.color=\'rgba(232,228,220,.3)\'">✕</button>'
         f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:.46rem;'
         f'letter-spacing:.2em;color:rgba(140,180,240,.5);margin-bottom:.35rem;">演 示 说 明</div>'
         f'<div style="font-family:Inter,sans-serif;font-size:.7rem;font-weight:300;'
-        f'color:rgba(232,228,220,.55);line-height:1.6;">{text}</div>'
+        f'color:rgba(232,228,220,.58);line-height:1.6;">{text}</div>'
         f'</div></div>',
         unsafe_allow_html=True,
     )
@@ -649,14 +670,6 @@ def page_overview() -> None:
         unsafe_allow_html=True,
     )
 
-    st.markdown(
-        '<div style="text-align:center;font-family:\'Cormorant Garamond\',serif;'
-        'font-size:.8rem;color:rgba(232,228,220,.45);letter-spacing:.06em;'
-        'font-style:italic;margin:.8rem 0 .2rem;">'
-        '展开各维度审计细节 →</div>',
-        unsafe_allow_html=True,
-    )
-
     if _nav(back_step=None, forward_label="来源验证 →"):
         st.session_state["step"] = 6
         st.rerun()
@@ -679,17 +692,12 @@ def page_source_detail() -> None:
     _scroll_top_on_step_change(6)
     _progress_bar(6)
     _wordmark()
-    step_header(
-        "06", "来 源 验 证",
-        "每项主张，<br>有据可查吗？",
-        "将 AI 总结拆解为原子主张，逐一对照原始材料。",
-    )
-
     _animate_expanders()
     _demo_guide(6)
 
     trace = passport.source_trace_result
     if not trace:
+        _mini_header("06", "来 源 验 证", "每项主张，有据可查吗？")
         st.info("来源追踪结果不可用。"); _nav(6, "→ 声音地图"); return
 
     total = len(trace.evidence_bundles)
@@ -701,19 +709,38 @@ def page_source_detail() -> None:
     q_risk_n = sum(1 for b in trace.evidence_bundles
                    if b.quantifier_assessment and not b.quantifier_assessment.supported)
 
+    # Compact header with stats inline on the right — saves ~4rem vs stacked layout
     st.markdown(
-        f'<div style="display:flex;gap:2.5rem;max-width:640px;margin:0 auto 1.8rem;'
-        f'padding:0 .5rem;opacity:0;animation:revealItem .6s ease .1s forwards;">'
-        f'<div><div style="font-size:.72rem;letter-spacing:.14em;color:rgba(232,228,220,.55);">可追溯</div>'
-        f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:2rem;'
-        f'color:rgba(232,228,220,.88);">{supported_n}'
-        f'<span style="font-size:.9rem;color:rgba(232,228,220,.38);">/{total}</span></div></div>'
-        f'<div><div style="font-size:.72rem;letter-spacing:.14em;color:rgba(232,228,220,.55);">无来源</div>'
-        f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:2rem;'
-        f'color:{("rgba(192,80,80,.9)" if unsup_n else "rgba(80,160,120,.9)")};">{unsup_n}</div></div>'
-        f'<div><div style="font-size:.72rem;letter-spacing:.14em;color:rgba(232,228,220,.55);">数量词风险</div>'
-        f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:2rem;'
-        f'color:{("rgba(176,126,48,.9)" if q_risk_n else "rgba(80,160,120,.9)")};">{q_risk_n}</div></div>'
+        f'<div style="display:flex;justify-content:space-between;align-items:flex-end;'
+        f'padding:.5rem 1rem .65rem;gap:1rem;">'
+        f'<div>'
+        f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:.52rem;'
+        f'letter-spacing:.24em;color:rgba(232,228,220,.35);margin-bottom:.28rem;">06 / 来 源 验 证</div>'
+        f'<div style="font-family:\'Cormorant Garamond\',serif;'
+        f'font-size:clamp(1.3rem,2.6vw,1.85rem);font-weight:300;'
+        f'color:rgba(232,228,220,.92);line-height:1.2;">每项主张，有据可查吗？</div>'
+        f'</div>'
+        f'<div style="display:flex;gap:1.4rem;align-items:flex-end;flex-shrink:0;'
+        f'opacity:0;animation:revealItem .6s ease .15s forwards;">'
+        f'<div style="text-align:right;">'
+        f'<div style="font-size:.6rem;letter-spacing:.1em;color:rgba(232,228,220,.42);">可追溯</div>'
+        f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:1.55rem;'
+        f'color:rgba(232,228,220,.88);line-height:1.1;">{supported_n}'
+        f'<span style="font-size:.72rem;color:rgba(232,228,220,.3);">/{total}</span></div>'
+        f'</div>'
+        f'<div style="text-align:right;">'
+        f'<div style="font-size:.6rem;letter-spacing:.1em;color:rgba(232,228,220,.42);">无来源</div>'
+        f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:1.55rem;'
+        f'color:{("rgba(192,80,80,.9)" if unsup_n else "rgba(80,160,120,.85)")};line-height:1.1;">'
+        f'{unsup_n}</div>'
+        f'</div>'
+        f'<div style="text-align:right;">'
+        f'<div style="font-size:.6rem;letter-spacing:.1em;color:rgba(232,228,220,.42);">数量词</div>'
+        f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:1.55rem;'
+        f'color:{("rgba(176,126,48,.9)" if q_risk_n else "rgba(80,160,120,.85)")};line-height:1.1;">'
+        f'{q_risk_n}</div>'
+        f'</div>'
+        f'</div>'
         f'</div>',
         unsafe_allow_html=True,
     )
@@ -725,7 +752,7 @@ def page_source_detail() -> None:
         SupportStatus.UNSUPPORTED: "rgba(192,80,80,.8)",
         SupportStatus.CONTRADICTED: "rgba(192,80,80,.8)",
     }
-    claims_html = '<div style="max-height:56vh;overflow-y:auto;padding-right:.4rem;">'
+    claims_html = '<div style="max-height:68vh;overflow-y:auto;padding-right:.4rem;">'
     for i, bundle in enumerate(trace.evidence_bundles):
         status = bundle.final_support_status
         lbl = SUPPORT_LABEL[status]
@@ -805,11 +832,7 @@ def page_voice_map() -> None:
     _scroll_top_on_step_change(7)
     _progress_bar(7)
     _wordmark()
-    step_header(
-        "07", "声 音 地 图",
-        "原始材料里<br>有哪些声音？",
-        "从参与者意见中重建真实主题图，检查 AI 总结覆盖了哪些、忽视了哪些。",
-    )
+    _mini_header("07", "声 音 地 图", "原始材料里，有哪些声音？")
 
     _animate_expanders()
     _demo_guide(7)
@@ -833,7 +856,7 @@ def page_voice_map() -> None:
         CoverageStatus.DISTORTED: "rgba(192,80,80,.7)",
         CoverageStatus.OMITTED: "rgba(192,80,80,.7)",
     }
-    voice_html = '<div style="max-height:56vh;overflow-y:auto;padding-right:.4rem;">'
+    voice_html = '<div style="max-height:68vh;overflow-y:auto;padding-right:.4rem;">'
     for assessment in sorted_a:
         cluster = cluster_lookup.get(assessment.cluster_id)
         if not cluster:
@@ -1149,11 +1172,7 @@ def page_passport() -> None:
     _scroll_top_on_step_change(10)
     _progress_bar(10)
     _wordmark()
-    step_header(
-        "10", "代 言 凭 证",
-        "MANDATE<br>REPRESENTATION PASSPORT",
-        "这是本次审计的结构化凭证。可下载留存或公开核查。",
-    )
+    _mini_header("10", "代 言 凭 证", "MANDATE REPRESENTATION PASSPORT")
 
     _demo_guide(10)
     _, final_bcls = FINAL_STATUS_META.get(passport.final_status, ("UNKNOWN", "b-muted"))
@@ -1179,7 +1198,7 @@ def page_passport() -> None:
     # Paper-textured passport card
     st.markdown(
         f'<div style="max-width:700px;margin:0 auto;">'
-        f'<div class="m-paper-doc" style="border-top:2px solid {sc};">'
+        f'<div class="m-paper-doc" style="border-top:2px solid {sc};padding:1.2rem 1.4rem;">'
         # Header
         f'<div style="display:flex;justify-content:space-between;align-items:flex-start;'
         f'margin-bottom:1.4rem;padding-bottom:1rem;'
@@ -1256,7 +1275,7 @@ def page_passport() -> None:
     st.markdown("</div></div>", unsafe_allow_html=True)
 
     # Downloads
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<div style='height:.5rem;'></div>", unsafe_allow_html=True)
     exporter = PassportExporter()
     c1, c2, c3, c4 = st.columns(4)
     with c1:
@@ -1289,11 +1308,7 @@ def page_revision() -> None:
 
     _progress_bar(11)
     _wordmark()
-    step_header(
-        "11", "忠 实 修 订",
-        "如果要说得更诚实，<br>它应该这样写。",
-        "MANDATE 根据审计结果生成了一份更忠实的版本。左边是 AI 原文，右边是修订版，下方列出了每一处改动及原因。",
-    )
+    _mini_header("11", "忠 实 修 订", "如果要说得更诚实，它应该这样写。")
 
     _demo_guide(11)
     revision = passport.revision_result
@@ -1562,6 +1577,94 @@ def page_revision() -> None:
 # ROUTING
 # ═══════════════════════════════════════════════════════════════════════════
 
+def page_about() -> None:
+    """Project introduction page — accessible from the hero landing page."""
+    _wordmark()
+    st.markdown(
+        '<div style="max-width:680px;margin:1.2rem auto 0;padding:0 1.5rem 4rem;">'
+
+        # ── Title ──────────────────────────────────────────────────
+        '<div style="text-align:center;margin-bottom:2rem;">'
+        '<div style="font-family:\'JetBrains Mono\',monospace;font-size:.52rem;'
+        'letter-spacing:.28em;color:rgba(232,228,220,.32);margin-bottom:.7rem;">'
+        '关 于 本 系 统</div>'
+        '<div style="font-family:\'Cormorant Garamond\',serif;'
+        'font-size:clamp(1.5rem,3.5vw,2.4rem);font-weight:300;'
+        'color:rgba(232,228,220,.95);line-height:1.3;">MANDATE｜代言权</div>'
+        '<div style="font-size:.78rem;color:rgba(232,228,220,.42);margin-top:.45rem;'
+        'font-family:Inter,sans-serif;letter-spacing:.08em;">'
+        'AI 代理表达的伦理审计系统</div>'
+        '</div>'
+
+        # ── Body ───────────────────────────────────────────────────
+        '<div style="font-family:\'Cormorant Garamond\',serif;font-size:1.05rem;'
+        'line-height:2.05;color:rgba(232,228,220,.80);">'
+
+        '<p style="margin-bottom:1.1rem;">'
+        '生成式人工智能正在从「生成内容」进入「代理表达」的阶段——'
+        '它不仅帮助人写作，也开始替学生、用户、消费者、组织成员乃至公众表达意见。'
+        '</p>'
+
+        '<p style="margin-bottom:1.1rem;">'
+        '当 AI 写出「大家普遍认为」「参与者一致支持」「用户主要担忧是……」时，'
+        '它看似只是在总结材料，实则已经在替某一群体发声。'
+        '</p>'
+
+        '<p style="margin-bottom:1.5rem;color:rgba(232,228,220,.58);">'
+        '问题在于：这段话究竟依据了谁的原始表达？'
+        '哪些声音被压缩、弱化或遗漏？'
+        '原始材料是否真的授权 AI 以这种方式代表？'
+        '</p>'
+
+        '</div>'
+
+        # ── Three pillars ──────────────────────────────────────────
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.9rem;margin:1.4rem 0;">'
+
+        '<div style="border:1px solid rgba(80,160,120,.2);border-top:2px solid rgba(80,160,120,.55);'
+        'border-radius:0 0 6px 6px;padding:.9rem 1rem;background:rgba(80,160,120,.04);">'
+        '<div style="font-size:.55rem;letter-spacing:.18em;color:rgba(80,160,120,.75);'
+        'font-family:\'JetBrains Mono\',monospace;margin-bottom:.5rem;">来源忠实性</div>'
+        '<div style="font-size:.84rem;color:rgba(232,228,220,.62);line-height:1.7;">'
+        '每项主张有原始依据吗？是否存在无来源概括或数量词夸大？'
+        '</div></div>'
+
+        '<div style="border:1px solid rgba(110,170,210,.2);border-top:2px solid rgba(110,170,210,.55);'
+        'border-radius:0 0 6px 6px;padding:.9rem 1rem;background:rgba(110,170,210,.04);">'
+        '<div style="font-size:.55rem;letter-spacing:.18em;color:rgba(110,170,210,.75);'
+        'font-family:\'JetBrains Mono\',monospace;margin-bottom:.5rem;">代表完整性</div>'
+        '<div style="font-size:.84rem;color:rgba(232,228,220,.62);line-height:1.7;">'
+        '哪些声音被遗漏？少数意见与程序性诉求是否从总结中消失？'
+        '</div></div>'
+
+        '<div style="border:1px solid rgba(176,126,48,.2);border-top:2px solid rgba(176,126,48,.55);'
+        'border-radius:0 0 6px 6px;padding:.9rem 1rem;background:rgba(176,126,48,.04);">'
+        '<div style="font-size:.55rem;letter-spacing:.18em;color:rgba(176,126,48,.75);'
+        'font-family:\'JetBrains Mono\',monospace;margin-bottom:.5rem;">授权适配性</div>'
+        '<div style="font-size:.84rem;color:rgba(232,228,220,.62);line-height:1.7;">'
+        '采集协议是否允许这种用途与受众？当前使用是否已超出授权边界？'
+        '</div></div>'
+
+        '</div>'
+
+        # ── Closing line ───────────────────────────────────────────
+        '<div style="font-size:.82rem;color:rgba(232,228,220,.38);line-height:1.8;'
+        'font-family:Inter,sans-serif;text-align:center;padding:.8rem 0 .2rem;">'
+        '本系统意在为 AI 代言行为建立透明、可追溯的审计框架，'
+        '使每一次代言都有据可查、可被问责。'
+        '</div>'
+
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    cols = st.columns([1, 2, 1])
+    with cols[1]:
+        if st.button("← 返回首页", key="about_back", use_container_width=True):
+            st.session_state["mode"] = "hero"
+            st.rerun()
+
+
 STEP_PAGES = {
     1: page_source,
     2: page_summary,
@@ -1619,16 +1722,19 @@ def main() -> None:
 
     # Handle query-param navigation from hero buttons
     action = st.query_params.get("action", "")
-    if action in ("start", "demo"):
+    if action in ("start", "demo", "about"):
         st.query_params.clear()
-        st.session_state["mode"] = "app"
-        st.session_state["step"] = 1
-        if action == "demo":
-            mark_demo_loaded()
-            st.session_state["demo_mode"] = True
-            _handle_demo_prefill()
+        if action == "about":
+            st.session_state["mode"] = "about"
         else:
-            st.session_state["demo_mode"] = False
+            st.session_state["mode"] = "app"
+            st.session_state["step"] = 1
+            if action == "demo":
+                mark_demo_loaded()
+                st.session_state["demo_mode"] = True
+                _handle_demo_prefill()
+            else:
+                st.session_state["demo_mode"] = False
         st.rerun()
 
     mode = st.session_state.get("mode", "hero")
@@ -1638,8 +1744,12 @@ def main() -> None:
         render_hero()
         return
 
-    # App mode: inject persistent background + CSS on EVERY step
+    # Inject atmosphere (background canvas + CSS) for all non-hero modes
     inject_atmosphere()
+
+    if mode == "about":
+        page_about()
+        return
 
     step = st.session_state.get("step", 1)
     page_fn = STEP_PAGES.get(step, page_source)

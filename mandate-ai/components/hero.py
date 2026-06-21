@@ -216,6 +216,39 @@ html,body {
 
 .btn-demo:hover { color:var(--cream); }
 
+.demo-group {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:.22rem;
+}
+
+.demo-hint {
+  font-family:'Inter',sans-serif;
+  font-size:.56rem;
+  letter-spacing:.06em;
+  color:rgba(232,228,220,.28);
+  pointer-events:none;
+}
+
+.btn-about {
+  display:block;
+  text-align:center;
+  margin-top:.9rem;
+  font-family:'Inter',sans-serif;
+  font-size:.6rem;
+  font-weight:300;
+  letter-spacing:.16em;
+  color:rgba(232,228,220,.25);
+  text-decoration:none;
+  cursor:pointer;
+  transition:color .3s;
+  background:none;
+  border:none;
+}
+
+.btn-about:hover { color:rgba(232,228,220,.62); }
+
 /* ─── BOTTOM PILLARS ─────────────────────────────── */
 #pillars {
   position:fixed;
@@ -291,8 +324,12 @@ html,body {
   </div>
   <div class="cta-row">
     <a class="btn-enter" href="javascript:void(0)" onclick="go('start')">· 进入体验 ·</a>
-    <a class="btn-demo"  href="javascript:void(0)" onclick="go('demo')" >载入演示案例 ○</a>
+    <div class="demo-group">
+      <span class="demo-hint">→ 首次体验推荐</span>
+      <a class="btn-demo" href="javascript:void(0)" onclick="go('demo')">载入演示案例 ○</a>
+    </div>
   </div>
+  <a class="btn-about" href="javascript:void(0)" onclick="go('about')">了解系统 ↗</a>
 </div>
 
 <!-- ── Bottom pillars ── -->
