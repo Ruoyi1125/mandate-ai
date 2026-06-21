@@ -291,9 +291,16 @@ def page_source() -> None:
         # Demo link — only show when not already in demo mode
         if not st.session_state.get("demo_mode"):
             st.markdown(
-                '<div style="margin-top:1.2rem;font-size:.72rem;'
-                'color:rgba(232,228,220,.55);font-family:Inter,sans-serif;">'
-                '自动填入学校 AI 预警系统的真实学生意见样本</div>',
+                '<div style="margin-top:1.4rem;padding:.7rem .9rem;'
+                'border:1px solid rgba(140,180,240,.15);border-radius:6px;'
+                'background:rgba(140,180,240,.03);">'
+                '<div style="font-size:.58rem;letter-spacing:.12em;'
+                'color:rgba(140,180,240,.6);font-family:\'JetBrains Mono\',monospace;'
+                'margin-bottom:.3rem;">→ 首次体验推荐</div>'
+                '<div style="font-size:.72rem;color:rgba(232,228,220,.5);'
+                'font-family:Inter,sans-serif;line-height:1.5;">'
+                '载入学校 AI 预警系统的真实学生意见样本，体验完整审计流程。</div>'
+                '</div>',
                 unsafe_allow_html=True,
             )
             if st.button("⊙ 载入演示案例", key="load_demo_step1"):

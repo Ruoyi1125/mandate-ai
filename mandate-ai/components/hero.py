@@ -326,10 +326,6 @@ html,body {
   </div>
   <div class="cta-row">
     <a class="btn-enter" href="javascript:void(0)" onclick="go('start')">· 进入体验 ·</a>
-    <div class="demo-group">
-      <span class="demo-hint">→ 首次体验推荐</span>
-      <a class="btn-demo" href="javascript:void(0)" onclick="go('demo')">载入演示案例 ○</a>
-    </div>
   </div>
   <a class="btn-about" href="javascript:void(0)" onclick="go('about')">了解系统 ↗</a>
 </div>
