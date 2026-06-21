@@ -712,40 +712,30 @@ def page_source_detail() -> None:
     q_risk_n = sum(1 for b in trace.evidence_bundles
                    if b.quantifier_assessment and not b.quantifier_assessment.supported)
 
-    # Compact header with stats inline on the right — saves ~4rem vs stacked layout
+    step_header("06", "来 源 验 证", "每项主张，<br>有据可查吗？",
+                "将 AI 总结拆解为原子主张，逐一对照原始材料。")
     st.markdown(
-        f'<div>{_WM_HTML}'
-        f'<div style="display:flex;justify-content:space-between;align-items:flex-end;'
-        f'padding:.4rem 1rem .6rem;gap:1rem;">'
-        f'<div>'
-        f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:.52rem;'
-        f'letter-spacing:.24em;color:rgba(232,228,220,.35);margin-bottom:.28rem;">06 / 来 源 验 证</div>'
-        f'<div style="font-family:\'Cormorant Garamond\',serif;'
-        f'font-size:clamp(1.3rem,2.6vw,1.85rem);font-weight:300;'
-        f'color:rgba(232,228,220,.92);line-height:1.2;">每项主张，有据可查吗？</div>'
-        f'</div>'
-        f'<div style="display:flex;gap:1.4rem;align-items:flex-end;flex-shrink:0;'
-        f'opacity:0;animation:revealItem .6s ease .15s forwards;">'
-        f'<div style="text-align:right;">'
+        f'<div style="display:flex;justify-content:center;gap:2.5rem;'
+        f'margin:-1rem 0 1.2rem;opacity:0;animation:revealItem .6s ease .15s forwards;">'
+        f'<div style="text-align:center;">'
         f'<div style="font-size:.6rem;letter-spacing:.1em;color:rgba(232,228,220,.42);">可追溯</div>'
         f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:1.55rem;'
         f'color:rgba(232,228,220,.88);line-height:1.1;">{supported_n}'
         f'<span style="font-size:.72rem;color:rgba(232,228,220,.3);">/{total}</span></div>'
         f'</div>'
-        f'<div style="text-align:right;">'
+        f'<div style="text-align:center;">'
         f'<div style="font-size:.6rem;letter-spacing:.1em;color:rgba(232,228,220,.42);">无来源</div>'
         f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:1.55rem;'
         f'color:{("rgba(192,80,80,.9)" if unsup_n else "rgba(80,160,120,.85)")};line-height:1.1;">'
         f'{unsup_n}</div>'
         f'</div>'
-        f'<div style="text-align:right;">'
+        f'<div style="text-align:center;">'
         f'<div style="font-size:.6rem;letter-spacing:.1em;color:rgba(232,228,220,.42);">数量词</div>'
         f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:1.55rem;'
         f'color:{("rgba(176,126,48,.9)" if q_risk_n else "rgba(80,160,120,.85)")};line-height:1.1;">'
         f'{q_risk_n}</div>'
         f'</div>'
-        f'</div>'
-        f'</div></div>',
+        f'</div>',
         unsafe_allow_html=True,
     )
 
@@ -835,7 +825,8 @@ def page_voice_map() -> None:
 
     _scroll_top_on_step_change(7)
     _progress_bar(7)
-    _mini_header("07", "声 音 地 图", "原始材料里，有哪些声音？")
+    step_header("07", "声 音 地 图", "原始材料里<br>有哪些声音？",
+                "从参与者意见中重建真实主题图，检查 AI 总结覆盖了哪些、忽视了哪些。")
 
     _animate_expanders()
     _demo_guide(7)
@@ -1172,7 +1163,8 @@ def page_passport() -> None:
 
     _scroll_top_on_step_change(10)
     _progress_bar(10)
-    _mini_header("10", "代 言 凭 证", "MANDATE REPRESENTATION PASSPORT")
+    step_header("10", "代 言 凭 证", "MANDATE<br>REPRESENTATION PASSPORT",
+                "这是本次审计的结构化凭证。可下载留存或公开核查。")
 
     _demo_guide(10)
     _, final_bcls = FINAL_STATUS_META.get(passport.final_status, ("UNKNOWN", "b-muted"))
@@ -1306,7 +1298,8 @@ def page_revision() -> None:
         st.session_state["step"] = 5; st.rerun(); return
 
     _progress_bar(11)
-    _mini_header("11", "忠 实 修 订", "如果要说得更诚实，它应该这样写。")
+    step_header("11", "忠 实 修 订", "如果要说得更诚实，<br>它应该这样写。",
+                "MANDATE 根据审计结果生成了一份更忠实的版本。左边是 AI 原文，右边是修订版，下方列出了每一处改动及原因。")
 
     _demo_guide(11)
     revision = passport.revision_result
