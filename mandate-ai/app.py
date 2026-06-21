@@ -138,9 +138,9 @@ def _wordmark() -> None:
 def _mini_header(num: str, zh: str, title: str) -> None:
     """Compact single-row heading for data-heavy pages that must fit in one viewport."""
     st.markdown(
-        f'<div style="text-align:center;padding:.55rem 1rem .45rem;">'
+        f'<div style="text-align:center;padding:.4rem 1rem .32rem;">'
         f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:.52rem;'
-        f'letter-spacing:.24em;color:rgba(232,228,220,.35);margin-bottom:.28rem;">{num} / {zh}</div>'
+        f'letter-spacing:.24em;color:rgba(232,228,220,.35);margin-bottom:.22rem;">{num} / {zh}</div>'
         f'<div style="font-family:\'Cormorant Garamond\',serif;'
         f'font-size:clamp(1.3rem,2.6vw,1.85rem);font-weight:300;'
         f'color:rgba(232,228,220,.92);line-height:1.2;">{title}</div>'
@@ -165,31 +165,73 @@ _DEMO_GUIDES: dict[int, str] = {
 
 
 def _demo_guide(step: int) -> None:
-    """Floating demo context card — only shown in demo mode. Has an X to dismiss."""
+    """Floating demo context card — injected into parent DOM via JS so the ✕ actually works."""
     if not st.session_state.get("demo_mode"):
         return
     text = _DEMO_GUIDES.get(step, "")
     if not text:
         return
-    card_id = f"dg-{step}"
-    st.markdown(
-        f'<div id="{card_id}" style="position:fixed;bottom:6.5rem;left:1.5rem;z-index:200;'
-        f'max-width:230px;opacity:0;animation:pageIn .7s ease .5s forwards;">'
-        f'<div style="background:rgba(10,15,32,.92);border:1px solid rgba(140,180,240,.14);'
-        f'border-radius:6px;padding:.7rem .95rem .7rem .95rem;backdrop-filter:blur(12px);'
-        f'position:relative;">'
-        f'<button onclick="document.getElementById(\'{card_id}\').style.display=\'none\'" '
-        f'style="position:absolute;top:.28rem;right:.4rem;background:none;border:none;'
-        f'cursor:pointer;color:rgba(232,228,220,.3);font-size:.72rem;line-height:1;padding:0;" '
-        f'onmouseover="this.style.color=\'rgba(232,228,220,.7)\'" '
-        f'onmouseout="this.style.color=\'rgba(232,228,220,.3)\'">✕</button>'
-        f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:.46rem;'
-        f'letter-spacing:.2em;color:rgba(140,180,240,.5);margin-bottom:.35rem;">演 示 说 明</div>'
-        f'<div style="font-family:Inter,sans-serif;font-size:.7rem;font-weight:300;'
-        f'color:rgba(232,228,220,.58);line-height:1.6;">{text}</div>'
-        f'</div></div>',
-        unsafe_allow_html=True,
-    )
+    # Safe-escape for embedding in a JS single-quoted string
+    txt_esc = text.replace("\\", "\\\\").replace("'", "\\'")
+    _components.html(f"""<script>
+(function() {{
+  var P = window.parent.document;
+  var id = 'dg-{step}';
+  var dk = 'dg-off-{step}';
+
+  // Remove guide cards from other steps
+  P.querySelectorAll('[data-dg]').forEach(function(el) {{
+    if (el.id !== id) el.remove();
+  }});
+
+  // Honour dismissal within browser session
+  try {{ if (sessionStorage.getItem(dk)) return; }} catch(e) {{}}
+
+  // Don't re-inject if already present
+  if (P.getElementById(id)) return;
+
+  // Outer wrapper (fixed position, fades in)
+  var d = P.createElement('div');
+  d.id = id;
+  d.dataset.dg = '1';
+  d.style.cssText = 'position:fixed;bottom:6.5rem;left:1.5rem;z-index:500;' +
+    'max-width:230px;opacity:0;animation:pageIn .7s ease .5s forwards;pointer-events:auto;';
+
+  // Inner card
+  var wrap = P.createElement('div');
+  wrap.style.cssText = 'background:rgba(10,15,32,.93);border:1px solid rgba(140,180,240,.18);' +
+    'border-radius:6px;padding:.7rem .95rem;backdrop-filter:blur(12px);position:relative;';
+
+  // Close button
+  var btn = P.createElement('button');
+  btn.textContent = '✕';
+  btn.style.cssText = 'position:absolute;top:.3rem;right:.42rem;background:none;border:none;' +
+    'cursor:pointer;color:rgba(232,228,220,.38);font-size:.78rem;line-height:1;padding:0 2px;';
+  btn.addEventListener('mouseover', function() {{ this.style.color = 'rgba(232,228,220,.82)'; }});
+  btn.addEventListener('mouseout',  function() {{ this.style.color = 'rgba(232,228,220,.38)'; }});
+  btn.addEventListener('click', function() {{
+    try {{ sessionStorage.setItem(dk, '1'); }} catch(e) {{}}
+    d.remove();
+  }});
+
+  // Label
+  var lbl = P.createElement('div');
+  lbl.style.cssText = 'font-family:JetBrains Mono,monospace;font-size:.46rem;letter-spacing:.2em;' +
+    'color:rgba(140,180,240,.55);margin-bottom:.35rem;';
+  lbl.textContent = '演 示 说 明';
+
+  // Body text
+  var body = P.createElement('div');
+  body.style.cssText = 'font-size:.7rem;font-weight:300;color:rgba(232,228,220,.6);line-height:1.6;';
+  body.textContent = '{txt_esc}';
+
+  wrap.appendChild(btn);
+  wrap.appendChild(lbl);
+  wrap.appendChild(body);
+  d.appendChild(wrap);
+  P.body.appendChild(d);
+}})();
+</script>""", height=0)
 
 
 def _animate_expanders() -> None:
@@ -224,7 +266,7 @@ def page_source() -> None:
     _demo_guide(1)
     step_header(
         "01", "原 声",
-        "先听见<br>真实的人。",
+        "先听见真实的人。",
         "上传 AI 试图总结的原始声音——它们将成为整个审计的基础。",
     )
 
@@ -342,16 +384,16 @@ def page_summary() -> None:
 
     # Single focal point: one big question, one input, whisper hints
     st.markdown(
-        '<div style="text-align:center;padding:1.4rem 2rem 1rem;">'
+        '<div style="text-align:center;padding:.7rem 2rem .55rem;">'
         '<div style="font-family:\'JetBrains Mono\',monospace;font-size:.55rem;'
-        'letter-spacing:.28em;color:rgba(232,228,220,.32);margin-bottom:.6rem;">02 / AI 说了什么</div>'
+        'letter-spacing:.28em;color:rgba(232,228,220,.32);margin-bottom:.45rem;">02 / AI 说了什么</div>'
         '<div style="font-family:\'Cormorant Garamond\',serif;'
-        'font-size:clamp(1.8rem,4vw,2.6rem);font-weight:300;'
+        'font-size:clamp(1.45rem,3.2vw,2.1rem);font-weight:300;'
         'color:rgba(232,228,220,.94);line-height:1.3;'
         'text-shadow:0 0 60px rgba(140,180,240,.3);">'
-        '它如何总结<br>这些声音？</div>'
+        '它如何总结这些声音？</div>'
         '<div style="font-family:Inter,sans-serif;font-size:.75rem;font-weight:300;'
-        'color:rgba(232,228,220,.42);margin-top:.7rem;letter-spacing:.12em;">'
+        'color:rgba(232,228,220,.42);margin-top:.45rem;letter-spacing:.12em;">'
         '问卷摘要 &nbsp;·&nbsp; 会议纪要 &nbsp;·&nbsp; AI 群体意见汇总'
         '</div></div>',
         unsafe_allow_html=True,
@@ -389,7 +431,7 @@ def page_auth() -> None:
     _wordmark()
     step_header(
         "03", "以什么名义",
-        "它获得了<br>什么授权？",
+        "它获得了什么授权？",
         "关于原始声音的采集协议，以及当前的实际用途。",
     )
 
@@ -478,7 +520,7 @@ def page_processing() -> None:
     _wordmark()
     step_header(
         "04", "核 查 中",
-        "MANDATE 正在<br>审阅这次代言。",
+        "MANDATE 正在审阅这次代言。",
     )
 
     _demo_guide(4)
@@ -609,9 +651,9 @@ def page_overview() -> None:
     sentence = final_status_sentence(passport.final_status)
 
     st.markdown(
-        '<div style="text-align:center;padding:1rem 1rem .6rem;">'
+        '<div style="text-align:center;padding:.65rem 1rem .5rem;">'
         '<div style="font-family:\'JetBrains Mono\',monospace;font-size:.55rem;'
-        'letter-spacing:.28em;color:rgba(232,228,220,.35);margin-bottom:.7rem;">05 / 结 论</div>'
+        'letter-spacing:.28em;color:rgba(232,228,220,.35);margin-bottom:.45rem;">05 / 结 论</div>'
         '<div style="margin-bottom:.8rem;">' + badge(label_zh, badge_cls) + '</div>'
         '<div style="font-family:\'Cormorant Garamond\',serif;'
         'font-size:clamp(1.1rem,2.5vw,1.5rem);font-weight:300;'
@@ -945,16 +987,16 @@ def page_lost_voices() -> None:
     n_lost = len(lost)
     sub_text = f"这 {n_lost} 个真实主题在 AI 总结中完全消失。" if lost else "未发现完全消失的原始主题。"
     st.markdown(
-        f'<div style="text-align:center;padding:1.2rem 1rem .8rem;">'
+        f'<div style="text-align:center;padding:.7rem 1rem .55rem;">'
         f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:.55rem;'
-        f'letter-spacing:.28em;color:rgba(192,80,80,.45);margin-bottom:.6rem;">08 / 消 失 的 声 音</div>'
+        f'letter-spacing:.28em;color:rgba(192,80,80,.45);margin-bottom:.4rem;">08 / 消 失 的 声 音</div>'
         f'<div style="font-family:\'Cormorant Garamond\',serif;'
-        f'font-size:clamp(1.8rem,4vw,2.6rem);font-weight:300;'
+        f'font-size:clamp(1.45rem,3.2vw,2.1rem);font-weight:300;'
         f'color:rgba(192,80,80,.82);line-height:1.25;'
         f'text-shadow:0 0 60px rgba(192,80,80,.25);">'
-        f'有些声音<br>从未被听见</div>'
+        f'有些声音从未被听见</div>'
         f'<div style="font-family:\'Cormorant Garamond\',serif;font-size:.88rem;font-style:italic;'
-        f'color:rgba(232,228,220,.48);margin-top:.5rem;letter-spacing:.04em;">'
+        f'color:rgba(232,228,220,.48);margin-top:.35rem;letter-spacing:.04em;">'
         f'{sub_text}</div>'
         f'</div>',
         unsafe_allow_html=True,
@@ -1042,7 +1084,7 @@ def page_auth_boundary() -> None:
     _wordmark()
     step_header(
         "09", "授 权 边 界",
-        "谁批准了<br>这次代言？",
+        "谁批准了这次代言？",
         "逐项核查原始授权与当前用途，标注越界与缺失项。",
     )
 
@@ -1205,7 +1247,7 @@ def page_passport() -> None:
     # Paper-textured passport card
     st.markdown(
         f'<div style="max-width:700px;margin:0 auto;">'
-        f'<div class="m-paper-doc" style="border-top:2px solid {sc};padding:1.2rem 1.4rem;">'
+        f'<div class="m-paper-doc" style="border-top:2px solid {sc};padding:1.5rem 1.8rem;">'
         # Header
         f'<div style="display:flex;justify-content:space-between;align-items:flex-start;'
         f'margin-bottom:1.4rem;padding-bottom:1rem;'
@@ -1223,8 +1265,8 @@ def page_passport() -> None:
         f'审计状态 · {final_zh}</div>'
         f'</div>'
         # Three metric columns
-        f'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;'
-        f'margin-bottom:1.4rem;">'
+        f'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.6rem;'
+        f'margin-bottom:1.5rem;">'
         # Source
         f'<div>'
         f'<div style="font-size:.64rem;letter-spacing:.15em;text-transform:uppercase;'

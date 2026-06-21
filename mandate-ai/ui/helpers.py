@@ -100,18 +100,18 @@ def step_header(num: str, zh: str, title: str, subtitle: str = "") -> None:
     """Render a full-width cinematic step heading."""
     sub_html = (
         f'<div style="font-family:Inter,sans-serif;font-size:.84rem;'
-        f'font-weight:300;color:rgba(232,228,220,.52);margin-top:.6rem;'
+        f'font-weight:300;color:rgba(232,228,220,.52);margin-top:.4rem;'
         f'letter-spacing:.02em;line-height:1.7;max-width:560px;'
         f'margin-left:auto;margin-right:auto;">{subtitle}</div>'
         if subtitle else ""
     )
     st.markdown(
-        f'<div style="text-align:center;padding:1.4rem 1rem 1.2rem;">'
-        f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:.58rem;'
-        f'letter-spacing:.28em;color:rgba(232,228,220,.38);'
-        f'text-transform:uppercase;margin-bottom:.7rem;">{num} / {zh}</div>'
+        f'<div style="text-align:center;padding:.7rem 1rem .55rem;">'
+        f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:.55rem;'
+        f'letter-spacing:.26em;color:rgba(232,228,220,.38);'
+        f'text-transform:uppercase;margin-bottom:.45rem;">{num} / {zh}</div>'
         f'<div style="font-family:\'Cormorant Garamond\',serif;'
-        f'font-size:clamp(1.8rem,4vw,2.6rem);font-weight:300;'
+        f'font-size:clamp(1.45rem,3.2vw,2.1rem);font-weight:300;'
         f'color:rgba(232,228,220,.97);line-height:1.25;'
         f'text-shadow:0 0 80px rgba(140,180,240,.4);">{title}</div>'
         f'{sub_html}</div>',
