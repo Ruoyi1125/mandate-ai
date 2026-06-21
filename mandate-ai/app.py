@@ -180,10 +180,10 @@ def _demo_guide(step: int) -> None:
     if not text:
         return
     st.markdown(
-        f'<div style="position:fixed;top:5rem;right:1.2rem;z-index:500;max-width:210px;">'
+        f'<div style="position:fixed;top:5rem;right:1.2rem;z-index:500;max-width:210px;'
+        f'animation:dgFade 6s ease forwards;">'
         f'<div style="background:rgba(10,15,32,.93);border:1px solid rgba(140,180,240,.2);'
-        f'border-radius:6px;padding:.65rem .9rem;backdrop-filter:blur(12px);'
-        f'animation:pageIn .7s ease .35s both,dgFade .45s ease 5.35s forwards;">'
+        f'border-radius:6px;padding:.65rem .9rem;backdrop-filter:blur(12px);">'
         f'<div style="font-family:JetBrains Mono,monospace;font-size:.44rem;'
         f'letter-spacing:.2em;color:rgba(140,180,240,.55);margin-bottom:.3rem;">演 示 说 明</div>'
         f'<div style="font-size:.68rem;font-weight:300;'
@@ -1252,21 +1252,23 @@ def page_passport() -> None:
         f'<div style="font-size:.76rem;color:rgba(232,228,220,.48);margin-top:.4rem;">{auth_lbl}</div>'
         f'<div style="font-size:.72rem;color:rgba(232,228,220,.38);margin-top:.1rem;">'
         f'{len(passport.missing_authorization_information)} 项待确认</div>'
-        f'</div>'
+        f'</div>'   # close auth col
+        f'</div>'   # close 3-col grid
         + (
-            '<div style="margin-top:1.1rem;padding:.85rem 1rem .7rem;'
-            'background:rgba(138,96,32,.07);border-radius:4px;">'
-            '<div style="font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;'
-            'color:rgba(176,126,48,.6);margin-bottom:.5rem;">必须完成</div>'
+            '<div style="margin-top:1.8rem;padding-top:1.2rem;'
+            'border-top:1px solid rgba(205,185,140,.12);">'
+            '<div style="font-size:.56rem;letter-spacing:.18em;text-transform:uppercase;'
+            'color:rgba(176,126,48,.55);margin-bottom:.7rem;">必 须 完 成</div>'
             + "".join(
-                f"<div style='font-size:.84rem;margin-bottom:.3rem;color:rgba(232,228,220,.78);'>"
+                f"<div style='font-size:.84rem;margin-bottom:.45rem;"
+                f"color:rgba(232,228,220,.78);line-height:1.5;'>"
                 f"{i+1}. {zh_action(a)}</div>"
                 for i, a in enumerate(passport.required_actions)
             )
             + '</div>'
             if passport.required_actions else ""
         )
-        + '</div></div>',
+        + '</div></div>',   # close paper-doc and outer wrapper
         unsafe_allow_html=True,
     )
 

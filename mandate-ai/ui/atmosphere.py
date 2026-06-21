@@ -213,10 +213,12 @@ header[data-testid="stHeader"], #MainMenu, footer,
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Demo guide auto-fade ─────────────────────────────────────────── */
+/* ── Demo guide fade-in then fade-out ────────────────────────────── */
 @keyframes dgFade {
-  from { opacity: 1; }
-  to   { opacity: 0; pointer-events: none; }
+  0%   { opacity: 0; }
+  8%   { opacity: 1; }
+  84%  { opacity: 1; }
+  100% { opacity: 0; pointer-events: none; }
 }
 
 /* Block container sizing */
