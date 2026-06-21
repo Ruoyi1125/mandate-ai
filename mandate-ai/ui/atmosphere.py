@@ -221,11 +221,11 @@ header[data-testid="stHeader"], #MainMenu, footer,
   100% { opacity: 0; pointer-events: none; }
 }
 
-/* Block container sizing — always fill 96 % of viewport */
+/* Block container sizing */
 .block-container {
   padding-top: 1rem !important;
   padding-bottom: 6rem !important;
-  max-width: 96vw !important;
+  max-width: 1240px !important;
   padding-left: 2rem !important;
   padding-right: 2rem !important;
 }
