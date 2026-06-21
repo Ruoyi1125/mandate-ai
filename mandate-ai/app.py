@@ -1254,23 +1254,25 @@ def page_passport() -> None:
         f'{len(passport.missing_authorization_information)} 项待确认</div>'
         f'</div>'   # close auth col
         f'</div>'   # close 3-col grid
-        + (
-            '<div style="margin-top:1.8rem;padding-top:1.2rem;'
-            'border-top:1px solid rgba(205,185,140,.12);">'
-            '<div style="font-size:.56rem;letter-spacing:.18em;text-transform:uppercase;'
-            'color:rgba(176,126,48,.55);margin-bottom:.7rem;">必 须 完 成</div>'
-            + "".join(
-                f"<div style='font-size:.84rem;margin-bottom:.45rem;"
-                f"color:rgba(232,228,220,.78);line-height:1.5;'>"
-                f"{i+1}. {zh_action(a)}</div>"
-                for i, a in enumerate(passport.required_actions)
-            )
-            + '</div>'
-            if passport.required_actions else ""
-        )
-        + '</div></div>',   # close paper-doc and outer wrapper
+        f'</div></div>',
         unsafe_allow_html=True,
     )
+
+    if passport.required_actions:
+        rows_html = "".join(
+            f"<div style='font-size:.88rem;margin-bottom:.4rem;"
+            f"color:rgba(232,228,220,.8);line-height:1.55;'>"
+            f"{i+1}. {zh_action(a)}</div>"
+            for i, a in enumerate(passport.required_actions)
+        )
+        st.markdown(
+            '<div style="max-width:700px;margin:1rem auto 0;">'
+            '<div class="m-card-warn">'
+            '<div class="m-label" style="color:rgba(176,126,48,.75);margin-bottom:.55rem;">必 须 完 成</div>'
+            + rows_html
+            + '</div></div>',
+            unsafe_allow_html=True,
+        )
 
     # Downloads
     exporter = PassportExporter()
