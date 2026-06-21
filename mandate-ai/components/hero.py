@@ -171,7 +171,7 @@ html,body {
   text-align:center;
 }
 
-.tagline { margin-bottom: 3em; }
+.tagline { margin-bottom: 2.2em; }
 
 /* ─── CTA BUTTONS ────────────────────────────────── */
 .cta-row { display:flex; gap:2rem; align-items:center; }
@@ -234,20 +234,22 @@ html,body {
 .btn-about {
   display:block;
   text-align:center;
-  margin-top:.9rem;
+  margin-top:1rem;
   font-family:'Inter',sans-serif;
-  font-size:.6rem;
+  font-size:.62rem;
   font-weight:300;
   letter-spacing:.16em;
-  color:rgba(232,228,220,.25);
+  color:rgba(232,228,220,.45);
   text-decoration:none;
   cursor:pointer;
   transition:color .3s;
   background:none;
   border:none;
+  border-bottom:1px solid rgba(232,228,220,.15);
+  padding-bottom:.1em;
 }
 
-.btn-about:hover { color:rgba(232,228,220,.62); }
+.btn-about:hover { color:rgba(232,228,220,.82); border-bottom-color:rgba(232,228,220,.4); }
 
 /* ─── BOTTOM PILLARS ─────────────────────────────── */
 #pillars {
