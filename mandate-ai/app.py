@@ -180,14 +180,10 @@ def _demo_guide(step: int) -> None:
     if not text:
         return
     st.markdown(
-        f'<style>'
-        f'.dg-card-{step}{{animation:pageIn .7s ease .35s both,dgFade .45s ease 5.35s forwards;}}'
-        f'@keyframes dgFade{{to{{opacity:0;pointer-events:none;}}}}'
-        f'</style>'
-        f'<div style="position:fixed;top:3.8rem;right:1.5rem;z-index:500;max-width:215px;">'
-        f'<div class="dg-card-{step}" '
-        f'style="background:rgba(10,15,32,.93);border:1px solid rgba(140,180,240,.2);'
-        f'border-radius:6px;padding:.65rem .9rem;backdrop-filter:blur(12px);">'
+        f'<div style="position:fixed;top:5rem;right:1.2rem;z-index:500;max-width:210px;">'
+        f'<div style="background:rgba(10,15,32,.93);border:1px solid rgba(140,180,240,.2);'
+        f'border-radius:6px;padding:.65rem .9rem;backdrop-filter:blur(12px);'
+        f'animation:pageIn .7s ease .35s both,dgFade .45s ease 5.35s forwards;">'
         f'<div style="font-family:JetBrains Mono,monospace;font-size:.44rem;'
         f'letter-spacing:.2em;color:rgba(140,180,240,.55);margin-bottom:.3rem;">演 示 说 明</div>'
         f'<div style="font-size:.68rem;font-weight:300;'
@@ -1257,14 +1253,9 @@ def page_passport() -> None:
         f'<div style="font-size:.72rem;color:rgba(232,228,220,.38);margin-top:.1rem;">'
         f'{len(passport.missing_authorization_information)} 项待确认</div>'
         f'</div>'
-        f'</div>',
-        unsafe_allow_html=True,
-    )
-
-    if passport.required_actions:
-        st.markdown(
-            '<div style="background:rgba(138,96,32,.08);border:1px solid rgba(138,96,32,.2);'
-            'border-radius:2px 6px 4px 3px / 5px 2px 6px 2px;padding:.9rem 1.1rem;margin-bottom:.8rem;">'
+        + (
+            '<div style="margin-top:1.1rem;padding:.85rem 1rem .7rem;'
+            'background:rgba(138,96,32,.07);border-radius:4px;">'
             '<div style="font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;'
             'color:rgba(176,126,48,.6);margin-bottom:.5rem;">必须完成</div>'
             + "".join(
@@ -1272,14 +1263,14 @@ def page_passport() -> None:
                 f"{i+1}. {zh_action(a)}</div>"
                 for i, a in enumerate(passport.required_actions)
             )
-            + "</div>",
-            unsafe_allow_html=True,
+            + '</div>'
+            if passport.required_actions else ""
         )
-
-    st.markdown("</div></div>", unsafe_allow_html=True)
+        + '</div></div>',
+        unsafe_allow_html=True,
+    )
 
     # Downloads
-    st.markdown("<div style='height:.5rem;'></div>", unsafe_allow_html=True)
     exporter = PassportExporter()
     c1, c2, c3, c4 = st.columns(4)
     with c1:
