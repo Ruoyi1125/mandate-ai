@@ -119,7 +119,7 @@ def step_header(num: str, zh: str, title: str, subtitle: str = "") -> None:
         f'letter-spacing:.26em;color:rgba(232,228,220,.38);'
         f'text-transform:uppercase;margin-bottom:.42rem;">{num} / {zh}</div>'
         f'<div style="font-family:\'Cormorant Garamond\',serif;'
-        f'font-size:clamp(1.45rem,3.2vw,2.1rem);font-weight:300;'
+        f'font-size:clamp(1.2rem,2.6vw,1.7rem);font-weight:300;'
         f'color:rgba(232,228,220,.97);line-height:1.25;'
         f'text-shadow:0 0 80px rgba(140,180,240,.4);">{title}</div>'
         f'{sub_html}</div></div>',

@@ -173,84 +173,44 @@ _DEMO_GUIDES: dict[int, str] = {
 
 
 def _demo_guide(step: int) -> None:
-    """Floating demo context card — injected into parent DOM via JS so the ✕ actually works."""
+    """Floating demo card — pure CSS checkbox toggle + CSS auto-fade. No JS dependency."""
     if not st.session_state.get("demo_mode"):
         return
     text = _DEMO_GUIDES.get(step, "")
     if not text:
         return
-    # Safe-escape for embedding in a JS single-quoted string
-    txt_esc = text.replace("\\", "\\\\").replace("'", "\\'")
-    _components.html(f"""<script>
-(function() {{
-  var P = window.parent.document;
-  var W = window.parent;
-  var id = 'dg-{step}';
-  var dk = 'dg-off-{step}';
-
-  // Remove guide cards from other steps
-  P.querySelectorAll('[data-dg]').forEach(function(el) {{
-    if (el.id !== id) el.remove();
-  }});
-
-  // Honour dismissal — use PARENT sessionStorage (persists across iframe instances)
-  try {{ if (W.sessionStorage.getItem(dk)) return; }} catch(e) {{}}
-
-  // Don't re-inject if already present
-  if (P.getElementById(id)) return;
-
-  // Outer wrapper — top-right to avoid clashing with bottom content
-  var d = P.createElement('div');
-  d.id = id;
-  d.dataset.dg = '1';
-  d.style.cssText = 'position:fixed;top:3.8rem;right:1.5rem;z-index:500;' +
-    'max-width:210px;opacity:0;animation:pageIn .7s ease .4s forwards;pointer-events:auto;';
-
-  // Inner card
-  var wrap = P.createElement('div');
-  wrap.style.cssText = 'background:rgba(10,15,32,.93);border:1px solid rgba(140,180,240,.18);' +
-    'border-radius:6px;padding:.65rem .9rem;backdrop-filter:blur(12px);position:relative;';
-
-  // Close button
-  var btn = P.createElement('button');
-  btn.textContent = '✕';
-  btn.style.cssText = 'position:absolute;top:.28rem;right:.4rem;background:none;border:none;' +
-    'cursor:pointer;color:rgba(232,228,220,.38);font-size:.76rem;line-height:1;padding:0 2px;';
-  btn.onmouseover = function() {{ this.style.color = 'rgba(232,228,220,.82)'; }};
-  btn.onmouseout  = function() {{ this.style.color = 'rgba(232,228,220,.38)'; }};
-  btn.onclick = function() {{
-    try {{ W.sessionStorage.setItem(dk, '1'); }} catch(e) {{}}
-    d.remove();
-  }};
-
-  // Label
-  var lbl = P.createElement('div');
-  lbl.style.cssText = 'font-family:JetBrains Mono,monospace;font-size:.44rem;letter-spacing:.2em;' +
-    'color:rgba(140,180,240,.55);margin-bottom:.3rem;';
-  lbl.textContent = '演 示 说 明';
-
-  // Body text
-  var body = P.createElement('div');
-  body.style.cssText = 'font-size:.68rem;font-weight:300;color:rgba(232,228,220,.6);line-height:1.6;';
-  body.textContent = '{txt_esc}';
-
-  wrap.appendChild(btn);
-  wrap.appendChild(lbl);
-  wrap.appendChild(body);
-  d.appendChild(wrap);
-  P.body.appendChild(d);
-
-  // 5-second auto-close fallback
-  setTimeout(function() {{
-    var card = P.getElementById(id);
-    if (card) {{
-      card.style.transition = 'opacity .5s ease';
-      card.style.opacity = '0';
-      setTimeout(function() {{ if (card.parentNode) card.remove(); }}, 500);
-    }}
-  }}, 5000);
-}})();
-</script>""", height=0)
+    cb = f"dg-cb-{step}"
+    st.markdown(
+        # CSS: sibling rule hides card when checkbox is checked; auto-fade after 5 s
+        f'<style>'
+        f'#{cb}:checked ~ .dg-wrap-{step} {{ opacity:0 !important; pointer-events:none !important; }}'
+        f'.dg-card-{step} {{ animation:pageIn .7s ease .35s both, dgFade .45s ease 5.35s forwards; }}'
+        f'@keyframes dgFade {{ to {{ opacity:0; pointer-events:none; }} }}'
+        f'</style>'
+        # Outer fixed-position container
+        f'<div style="position:fixed;top:3.8rem;right:1.5rem;z-index:500;max-width:215px;">'
+        # Hidden checkbox — toggled by label click (pure HTML, no JS)
+        f'<input type="checkbox" id="{cb}" style="position:absolute;opacity:0;width:0;height:0;">'
+        # Everything else is a sibling of the checkbox — hidden via CSS :checked ~ rule
+        f'<div class="dg-wrap-{step}" '
+        f'style="transition:opacity .3s ease;">'
+        f'<div class="dg-card-{step}" '
+        f'style="background:rgba(10,15,32,.93);border:1px solid rgba(140,180,240,.2);'
+        f'border-radius:6px;padding:.65rem .9rem;backdrop-filter:blur(12px);position:relative;">'
+        # ✕ label (points to checkbox — clicking it checks it → CSS hides card)
+        f'<label for="{cb}" '
+        f'style="position:absolute;top:.28rem;right:.42rem;cursor:pointer;'
+        f'color:rgba(232,228,220,.38);font-size:.76rem;line-height:1;'
+        f'padding:0 2px;user-select:none;z-index:1;">✕</label>'
+        f'<div style="font-family:JetBrains Mono,monospace;font-size:.44rem;'
+        f'letter-spacing:.2em;color:rgba(140,180,240,.55);margin-bottom:.3rem;">演 示 说 明</div>'
+        f'<div style="font-size:.68rem;font-weight:300;'
+        f'color:rgba(232,228,220,.62);line-height:1.6;">{text}</div>'
+        f'</div>'
+        f'</div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
 
 
 def _animate_expanders() -> None:
@@ -773,8 +733,9 @@ def page_source_detail() -> None:
 
     # Compact header with stats inline on the right — saves ~4rem vs stacked layout
     st.markdown(
+        f'<div>{_WM_HTML}'
         f'<div style="display:flex;justify-content:space-between;align-items:flex-end;'
-        f'padding:.5rem 1rem .65rem;gap:1rem;">'
+        f'padding:.4rem 1rem .6rem;gap:1rem;">'
         f'<div>'
         f'<div style="font-family:\'JetBrains Mono\',monospace;font-size:.52rem;'
         f'letter-spacing:.24em;color:rgba(232,228,220,.35);margin-bottom:.28rem;">06 / 来 源 验 证</div>'
@@ -803,7 +764,7 @@ def page_source_detail() -> None:
         f'{q_risk_n}</div>'
         f'</div>'
         f'</div>'
-        f'</div>',
+        f'</div></div>',
         unsafe_allow_html=True,
     )
 
